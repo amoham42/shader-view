@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer components {
+
+    .icon-button {
+        background-color: transparent;
+        border: none;
+        color: #ffffff;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 9999px; /* Full rounded */
+        pointer-events: initial;
+    }
+
+    .shader__icon {
+        width: 1.5rem;
+        fill: #fff;
+        display: block;
+        margin: 0.5rem;
+        align-items: center;
+        row-gap: 0.5rem;
+        cursor: default;
+    }
+
+    .show-on-hover {
+        opacity: 0;
+        transition: opacity 0.25s ease-in;
+        backdrop-filter: blur(20px);
+        border-radius: 3px;
+        -webkit-backdrop-filter: blur(20px);
+        overflow: hidden;
+    }
+}
+
+@layer utilities {
+  body.ui-active .show-on-hover {
+    opacity: 1;
+    transition: opacity .25s ease-out;
+  }
+}
