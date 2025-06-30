@@ -46,12 +46,12 @@
         <div class="flex items-center space-x-3">
           <div class="history relative">
             <button class="icon-button history__toggle" type="button" title="History">
-              <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" class="w-6 h-6">
+              <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="2rem" height="2rem">
                 <path d="M13 3C8.03 3 4 7.03 4 12H1L4.89 15.89L4.96 16.03L9 12H6C6 8.13 9.13 5 13 5C16.87 5 20 8.13 20 12C20 15.87 16.87 19 13 19C11.07 19 9.32 18.21 8.06 16.94L6.64 18.36C8.27 19.99 10.51 21 13 21C17.97 21 22 16.97 22 12C22 7.03 17.97 3 13 3ZM12 8V13L16.28 15.54L17 14.33L13.5 12.25V8H12Z" fill="white"></path>
               </svg>
             </button>
             <button class="icon-button history__close hidden" type="button" title="Close History">
-                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" class="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="2rem" height="2rem">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="white"></path>
                 </svg>
               </button>
@@ -60,13 +60,13 @@
 
           <div class="menu relative">
             <button class="icon-button menu__toggle" type="button" title="Menu">
-              <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" class="w-6 h-6">
+              <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="2rem" height="2rem">
                 <path d="M3 18h18v-2h-18v2zm0-5h18v-2h-18v2zm0-7v2h18v-2h-18z" fill="white"></path>
               </svg>
             </button>
             
               <button class="icon-button menu__close hidden" type="button" title="Close Menu">
-                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" class="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="2rem" height="2rem">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="white"></path>
                 </svg>
               </button>
@@ -75,26 +75,40 @@
         </div>
       </header>
 
-      <footer class="show-on-hover absolute bottom-0 inset-x-0 left-0 px-4 py-2">
-        <div class="flex gap-5">
-          <a href="#" target="_blank" class="text-white text-left flex gap-5">
+      <footer class="show-on-hover absolute bottom-0 inset-x-0 px-4 py-1">
+        <div class="flex items-center gap-4">
+
+          <a href="#" target="_blank" class="shader__link flex-shrink-0 flex items-center gap-3 text-white">
             <div class="whitespace-nowrap content-center">
               <div class="shader__name text-xl font-bold font-[Josefin+Sans]"></div>
-              <div class="shader__author font-[Josefin+Sans]"></div>
+              <div class="shader__author text-normal font-[Josefin+Sans]"></div>
             </div>
           </a>
-          <div class="text-white flex gap-5">
-            <div class="shader__icon flex flex-col gap-y-2">
+          
+          <div class="flex items-center text-white gap-4">
+            <div class="shader__icon flex gap-2 items-center">
               <img src="icons/like.svg" alt="Likes"/>
-              <span class="like__impressions font-[Josefin+Sans]"></span>
+              <div class="flex flex-col items-center p-0 m-0">
+                <span class="like__impressions text-lg font-semibold font-[Josefin+Sans]"></span>
+                <span class="text-xs font-[Josefin+Sans]">Likes</span>
+              </div>
             </div>
-            <div class="shader__icon flex flex-col gap-y-2">
+            <div class="shader__icon flex gap-2 items-center">
               <img src="icons/view.svg" alt="Views"/>
-              <span class="view__impressions font-[Josefin+Sans]"></span>
+              <div class="flex flex-col items-center p-0 m-0">
+                <span class="view__impressions text-lg font-semibold font-[Josefin+Sans]"></span>
+                <span class="text-xs font-[Josefin+Sans]">Views</span>
+              </div>
             </div>
           </div>
-          <a id="button" target="_blank" href="" title="Shader View Extension">
-            <img src="icons/repo.svg"></a>
+
+          <button class="repo__link my-1" title="Snapshot">
+            <img class="w-[65%]" src="icons/screenshot.svg">
+          </button>
+          <a class="repo__link m-0 my-1" target="_blank" href="https://github.com/amoham42/shader-view" title="Shader View Extension">
+            <img class="w-[55%]" src="icons/repo.svg">
+          </a>
+          
         </div>
       </footer>
     <script type="module" src="/src/main.js"></script>

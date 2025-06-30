@@ -19,5 +19,24 @@ document.addEventListener("DOMContentLoaded", () => {
   else console.error("watchInit function not found!");
 });
 
-document.querySelector(".like__impressions").innerHTML = "100";
-document.querySelector(".view__impressions").innerHTML = "100";
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('button[title="Snapshot"]');
+  const canvas = document.getElementById('demogl');
+
+  btn.addEventListener('click', () => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const link = document.createElement('a');
+        link.download = 'snapshot.png';
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      },
+      'image/png',
+      1 
+    );
+  });
+});

@@ -1,21 +1,19 @@
 export function uiInit(info) {
-    const nameElement = document.querySelector('.shader__name');
-    if (nameElement) {
-        nameElement.textContent = info.name;
-    }
+    const nameEl = document.querySelector('.shader__name');
+    if (nameEl) nameEl.textContent = info.name;
 
-    const authorElement = document.querySelector('.shader__author');
-    if (authorElement) {
-        authorElement.textContent = `by ${info.username}`;
-    }
+    const authorEl = document.querySelector('.shader__author');
+    if (authorEl) authorEl.textContent = `by ${info.username}`;
 
-    // Update the shader link to point to the original
-    const shaderLink = document.querySelector('.shader-link');
-    if (shaderLink) {
-        shaderLink.href = `https://www.shadertoy.com/view/${gShaderID}`;
-    }
+    const linkEl = document.querySelector('.shader__link');
+    if (linkEl) linkEl.href = `https://www.shadertoy.com/view/${gShaderID}`;
 
-    // Add UI visibility handling
+    const likeEl = document.querySelector('.like__impressions');
+    if (likeEl) likeEl.textContent = info.likes;
+
+    const viewEl = document.querySelector('.view__impressions');
+    if (viewEl) viewEl.textContent = info.viewed;
+
     let timeout;
     const body = document.body;
 
@@ -27,13 +25,8 @@ export function uiInit(info) {
         }, 3000); // Hide UI after 3 seconds of inactivity
     }
 
-    // Show UI on mouse movement
     document.addEventListener('mousemove', showUI);
-    
-    // Show UI on touch
     document.addEventListener('touchstart', showUI);
-
-    // Show UI initially
     showUI();
 
     // Handle menu toggle
