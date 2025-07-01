@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "Shadertoy New Tab",
+    "version": "1.0",
+    "description": "Display random Shadertoy shaders on new tabs",
+    "permissions": [
+        "activeTab"
+    ],
+    "host_permissions": [
+        "https://www.shadertoy.com/*"
+    ],
+    "chrome_url_overrides": {
+        "newtab": "src/newtab.html"
+    },
+    "action": {
+        "default_popup": "src/popup.html"
+    }
+}

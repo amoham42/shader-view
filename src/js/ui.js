@@ -1,3 +1,24 @@
+
+function setupToggle({
+    containerSelector,
+    toggleSelector,
+    closeSelector,
+    openClass}) {
+
+    const container = document.querySelector(containerSelector);
+    const toggleBtn = document.querySelector(toggleSelector);
+    const closeBtn = document.querySelector(closeSelector);
+  
+    if (!container || !toggleBtn || !closeBtn) return;
+    [toggleBtn, closeBtn].forEach(btn => {
+        btn.addEventListener('click', () => {
+            const isNowOpen = container.classList.toggle(openClass);
+            toggleBtn.classList.toggle('hidden', isNowOpen);
+            closeBtn.classList.toggle('hidden', !isNowOpen);
+        });
+    });
+}
+
 export function uiInit(info) {
     const nameEl = document.querySelector('.shader__name');
     if (nameEl) nameEl.textContent = info.name;
@@ -22,36 +43,24 @@ export function uiInit(info) {
         clearTimeout(timeout);
         timeout = setTimeout(() => {
             body.classList.remove('ui-active');
-        }, 3000); // Hide UI after 3 seconds of inactivity
+        }, 2000); // Hide UI after 3 seconds of inactivity
     }
 
     document.addEventListener('mousemove', showUI);
     document.addEventListener('touchstart', showUI);
     showUI();
-
-    // Handle menu toggle
-    const menu = document.querySelector('.menu');
-    const menuToggle = document.querySelector('.menu__toggle');
-    const menuClose = document.querySelector('.menu__close');
-
-    menuToggle.addEventListener('click', () => {
-        menu.classList.add('menu--open');
+      
+    setupToggle({
+        containerSelector: '.menu',
+        toggleSelector: '.menu__toggle',
+        closeSelector: '.menu__close',
+        openClass: 'menu--open'
     });
-
-    menuClose.addEventListener('click', () => {
-        menu.classList.remove('menu--open');
-    });
-
-    // Handle history toggle
-    const history = document.querySelector('.history');
-    const historyToggle = document.querySelector('.history__toggle');
-    const historyClose = document.querySelector('.history__close');
-
-    historyToggle.addEventListener('click', () => {
-        history.classList.add('history--open');
-    });
-
-    historyClose.addEventListener('click', () => {
-        history.classList.remove('history--open');
+    
+    setupToggle({
+        containerSelector: '.history',
+        toggleSelector: '.history__toggle',
+        closeSelector: '.history__close',
+        openClass: 'history--open'
     });
 }

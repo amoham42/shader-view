@@ -2,14 +2,21 @@
 
 @layer components {
 
-  .icon-button {
+  .icon__button {
     background-color: transparent;
     border: none;
+    border-radius: 9999px;
     color: #ffffff;
     cursor: pointer;
     padding: 0.5rem;
-    border-radius: 9999px; /* Full rounded */
     pointer-events: initial;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .icon__button:hover {
+    transform: scale(1.1);
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
   }
 
   .shader__icon {
@@ -37,6 +44,15 @@
     align-items: center;
     justify-content: center;
     margin-left: auto;
+  }
+
+  .menu__content,
+  .history__content {
+    display: none;
+  }
+  .menu--open .menu__content,
+  .history--open .history__content {
+    display: block;
   }
 }
 
