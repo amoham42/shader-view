@@ -119,7 +119,6 @@ export class ShaderToy {
     }
     //---------------------------------
     Stop() {
-        document.getElementById("myPauseButton").style.background = "url('/img/playEmbed.png')";
         this.mIsPaused = true;
         this.mEffect.StopOutputs();
     }
@@ -130,7 +129,6 @@ export class ShaderToy {
         }
 
         else {
-            document.getElementById("myPauseButton").style.background = "url('/img/pauseEmbed.png')";
             this.mTOffset = this.mTf;
             this.mTo = time;
             this.mIsPaused = false;
@@ -221,22 +219,79 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
     }
 }
 
-export function watchInit() {
-      //-- shadertoy --------------------------------------------------------
-    var viewerParent = document.getElementById("player");
-    document.body.addEventListener( "keydown", function(e) {
-        var ele = piGetSourceElement(e)
-        if( e.key === 8 && ele === document.body )
-            e.preventDefault();
+function interactionButtonsInit() {
+    const rewindBtn     = document.querySelector('button[title="Rewind"]');
+    const pauseBtn      = document.querySelector('button[title="Pause"]');
+    const fullscreenBtn = document.querySelector('button[title="Fullscreen"]');
+  
+    if (!rewindBtn || !pauseBtn || !fullscreenBtn) {
+        console.warn('One or more interaction buttons not found');
+        return;
+    }
+
+    rewindBtn.addEventListener('click', () => {
+        if (window.gShaderToy) {
+            window.gShaderToy.resetTime();
+        }
     });
-    //-- get info --------------------------------------------------------
+  
+    pauseBtn.addEventListener('click', () => {
+        if (!window.gShaderToy) return;
+        window.gShaderToy.pauseTime();
+        const pauseIcon = document.getElementById('pause__icon');
+        const playIcon = document.getElementById('play__icon');
+        if (window.gShaderToy.mIsPaused) {
+            pauseIcon.classList.add('hidden');
+            playIcon.classList.remove('hidden');
+            pauseBtn.title = 'Play';
+        } else {
+            pauseIcon.classList.remove('hidden');
+            playIcon.classList.add('hidden');
+            pauseBtn.title = 'Pause';
+        }
+    });
+  
+    fullscreenBtn.addEventListener('click', () => {
+        if (!window.gShaderToy) return;
+        const canvas = window.gShaderToy.mCanvas;
+        if (!piIsFullScreen()) {
+            piRequestFullScreen(canvas);
+            canvas.focus();
+        } else {
+            piExitFullScreen();
+        }
+    });
+}
+
+export function loadShader(shaderID) {
+    // Update global shader ID
+    window.gShaderID = shaderID;
+    
+    // Completely destroy the current shader object
+    if (window.gShaderToy) {
+        window.gShaderToy.Stop();
+        // Clean up all passes
+        if (window.gShaderToy.mEffect && window.gShaderToy.mEffect.mPasses) {
+            while (window.gShaderToy.mEffect.mPasses.length > 0) {
+                window.gShaderToy.mEffect.DestroyPass(0);
+            }
+        }
+        window.gShaderToy = null;
+    }
+    
+    var viewerParent = document.getElementById("player");
+    
+    // Clear any existing preview images (but keep the noWebGL image)
+    const existingImages = viewerParent.querySelectorAll('img:not(#noWebGL_ShaderImage)');
+    existingImages.forEach(img => img.remove());
 
     var httpReq = new XMLHttpRequest();
-    httpReq.open( "POST", "http://localhost:3000/shadertoy", true );
+    httpReq.open("POST", "http://localhost:3000/shadertoy", true);
     httpReq.responseType = "json";
     httpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    var str = "{ \"shaders\" : [\"" + gShaderID + "\"] }";
-    str = "s=" + encodeURIComponent(str) + "&nt=0&nl=0&np=0";;
+    var str = "{ \"shaders\" : [\"" + shaderID + "\"] }";
+    str = "s=" + encodeURIComponent(str) + "&nt=0&nl=0&np=0";
+    
     httpReq.onload = function() {
         var jsnShader = httpReq.response;
         if (!jsnShader || !jsnShader[0] || !jsnShader[0].info) {
@@ -244,17 +299,23 @@ export function watchInit() {
             return;
         }
 
+        // Update UI with new shader info
         uiInit(jsnShader[0].info);
+        
         if (jsnShader[0].info.usePreview === 1) {
-            let url = "/media/shaders/" + gShaderID + ".jpg";
+            let url = "/media/shaders/" + shaderID + ".jpg";
+            console.log(url);
             var img = new Image();
             img.style = "width:100%;";
             img.onload = function () {
                 viewerParent.appendChild(img);
             };
-            img.onerror = function (ev) { iCompileAndStart(viewerParent, jsnShader); };
+            img.onerror = function (ev) { 
+                iCompileAndStart(viewerParent, jsnShader); 
+            };
             img.src = url;
         } else {
+            // This will create a new ShaderToy object
             iCompileAndStart(viewerParent, jsnShader);
         }
     }
@@ -262,5 +323,22 @@ export function watchInit() {
     httpReq.onerror = function() {
         console.error("Network error when fetching shader data");
     };
-    httpReq.send( str );
+    
+    httpReq.send(str);
+}
+
+export function watchInit() {
+    //-- shadertoy --------------------------------------------------------
+    var viewerParent = document.getElementById("player");
+    document.body.addEventListener( "keydown", function(e) {
+        var ele = piGetSourceElement(e)
+        if( e.key === 8 && ele === document.body )
+            e.preventDefault();
+    });
+
+    // Load the initial shader
+    loadShader(window.gShaderID);
+    
+    // Initialize interaction buttons
+    interactionButtonsInit();
 }
