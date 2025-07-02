@@ -1,4 +1,5 @@
 import { loadShader } from './libs/shadertoy.js';
+// import { QualityManager } from './quality.js';
 
 function setupToggle({
     containerSelector,
@@ -34,56 +35,6 @@ function setupToggle({
                 element.classList.toggle(classToToggle, isNowOpen);
             });
         });
-    });
-}
-
-export function uiInit(info) {
-    const nameEl = document.querySelector('.shader__name');
-    if (nameEl) nameEl.textContent = info.name;
-
-    const authorEl = document.querySelector('.shader__author');
-    if (authorEl) authorEl.textContent = `by ${info.username}`;
-
-    const linkEl = document.querySelector('.shader__link');
-    if (linkEl) linkEl.href = `https://www.shadertoy.com/view/${gShaderID}`;
-
-    const likeEl = document.querySelector('.like__impressions');
-    if (likeEl) likeEl.textContent = info.likes;
-
-    const viewEl = document.querySelector('.view__impressions');
-    if (viewEl) viewEl.textContent = info.viewed;
-
-    let timeout;
-    const body = document.body;
-
-    function showUI() {
-        body.classList.add('ui-active');
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            body.classList.remove('ui-active');
-        }, 2000);
-    }
-
-    document.addEventListener('mousemove', showUI);
-    document.addEventListener('touchstart', showUI);
-    showUI();
-      
-    setupToggle({
-        containerSelector: '.menu',
-        toggleSelector: '.menu__toggle',
-        closeSelector: '.menu__close',
-        openClass: 'menu--open',
-        contentSelector: '.menu__content'
-    });
-    
-    setupToggle({
-        containerSelector: '.history',
-        toggleSelector: '.history__toggle',
-        closeSelector: '.history__close',
-        openClass: 'history--open',
-        contentSelector: '.history__content',
-        additionalToggleSelectors: ['.master__container', '.history__content'],
-        additionalToggleClass: 'history-open'
     });
 }
 
@@ -135,3 +86,58 @@ export function populateHistoryItems(data) {
       historyContent.appendChild(historyItem);
     });
   }
+
+export function uiInit(info) {
+    const nameEl = document.querySelector('.shader__name');
+    if (nameEl) nameEl.textContent = info.name;
+
+    const authorEl = document.querySelector('.shader__author');
+    if (authorEl) authorEl.textContent = `by ${info.username}`;
+
+    const linkEl = document.querySelector('.shader__link');
+    if (linkEl) linkEl.href = `https://www.shadertoy.com/view/${gShaderID}`;
+
+    const likeEl = document.querySelector('.like__impressions');
+    if (likeEl) likeEl.textContent = info.likes;
+
+    const viewEl = document.querySelector('.view__impressions');
+    if (viewEl) viewEl.textContent = info.viewed;
+
+    let timeout;
+    const body = document.body;
+
+    function showUI() {
+        body.classList.add('ui-active');
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            body.classList.remove('ui-active');
+        }, 2000);
+    }
+
+    document.addEventListener('mousemove', showUI);
+    document.addEventListener('touchstart', showUI);
+    showUI();
+      
+    setupToggle({
+        containerSelector: '.menu',
+        toggleSelector: '.menu__toggle',
+        closeSelector: '.menu__close',
+        openClass: 'menu--open',
+        contentSelector: '.menu__content'
+    });
+    
+    setupToggle({
+        containerSelector: '.history',
+        toggleSelector: '.history__toggle',
+        closeSelector: '.history__close',
+        openClass: 'history--open',
+        contentSelector: '.history__content',
+        additionalToggleSelectors: ['.master__container', '.history__content'],
+        additionalToggleClass: 'history-open'
+    });
+
+    // window.qualityManager = new QualityManager();
+
+    // const qualityButton = document.querySelector('#quality__value');
+    // qualityButton.addEventListener('click', () => window.qualityManager.cycleQuality());
+}

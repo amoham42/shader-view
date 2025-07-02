@@ -4,7 +4,8 @@
     "version": "1.0",
     "description": "Display random Shadertoy shaders on new tabs",
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "storage"
     ],
     "host_permissions": [
         "https://www.shadertoy.com/*"
