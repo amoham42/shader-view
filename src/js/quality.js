@@ -18,31 +18,7 @@ export class QualityManager {
       
       this.applyQuality();
     }
-  
-    async loadQualitySetting() {
-      try {
-        const result = await chrome.storage.local.get(['canvasQuality']);
-        if (result.canvasQuality) {
-          this.currentQuality = result.canvasQuality;
-        } else {
-          // Save the default quality setting if none exists
-          await this.saveQualitySetting();
-        }
-      } catch (error) {
-        console.warn('Could not load quality setting:', error);
-        // Save the default quality setting even if loading failed
-        await this.saveQualitySetting();
-      }
-    }
-  
-    async saveQualitySetting() {
-      try {
-        await chrome.storage.local.set({ canvasQuality: this.currentQuality });
-      } catch (error) {
-        console.warn('Could not save quality setting:', error);
-      }
-    }
-  
+
     cycleQuality() {
       const currentIndex = this.qualities.indexOf(this.currentQuality);
       const nextIndex = (currentIndex + 1) % this.qualities.length;
@@ -50,6 +26,30 @@ export class QualityManager {
       this.qualityText.textContent = this.currentQuality;
       this.saveQualitySetting();
       this.applyQuality();
+    }
+  
+    async loadQualitySetting() {
+      this.currentQuality = 'High';
+      return;
+      try {
+        const result = await chrome.storage.local.get(['canvasQuality']);
+        if (result.canvasQuality) {
+          this.currentQuality = result.canvasQuality;
+        } else {
+          await this.saveQualitySetting();
+        }
+      } catch (error) {
+        console.warn('Could not load quality setting:', error);
+        await this.saveQualitySetting();
+      }
+    }
+  
+    async saveQualitySetting() {
+      try {
+        // await chrome.storage.local.set({ canvasQuality: this.currentQuality });
+      } catch (error) {
+        console.warn('Could not save quality setting:', error);
+      }
     }
   
     getResolutionScale() {
@@ -111,9 +111,9 @@ export class QualityManager {
     }
 }
   
-document.addEventListener('DOMContentLoaded', () => {
-    window.qualityManager = new QualityManager();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     window.qualityManager = new QualityManager();
+// });
 
 window.addEventListener('resize', () => {
     if (window.qualityManager) {

@@ -7,7 +7,7 @@ import {
     piExitFullScreen,
     piGetSourceElement
 } from './piLibs.js';
-import { uiInit } from "../ui.js";
+import { updateShaderInfo } from "../ui.js";
 import { Effect } from "./effect.js";
 window.gShaderToy = null;
 
@@ -267,18 +267,7 @@ export function loadShader(shaderID) {
     // Update global shader ID
     window.gShaderID = shaderID;
     
-    // Completely destroy the current shader object
-    if (window.gShaderToy) {
-        window.gShaderToy.Stop();
-        // Clean up all passes
-        if (window.gShaderToy.mEffect && window.gShaderToy.mEffect.mPasses) {
-            while (window.gShaderToy.mEffect.mPasses.length > 0) {
-                window.gShaderToy.mEffect.DestroyPass(0);
-            }
-        }
-        window.gShaderToy = null;
-    }
-    
+  
     var viewerParent = document.getElementById("player");
     
     // Clear any existing preview images (but keep the noWebGL image)
@@ -300,11 +289,10 @@ export function loadShader(shaderID) {
         }
 
         // Update UI with new shader info
-        uiInit(jsnShader[0].info);
+        updateShaderInfo(jsnShader[0].info);
         
         if (jsnShader[0].info.usePreview === 1) {
             let url = "/media/shaders/" + shaderID + ".jpg";
-            console.log(url);
             var img = new Image();
             img.style = "width:100%;";
             img.onload = function () {
@@ -336,9 +324,6 @@ export function watchInit() {
             e.preventDefault();
     });
 
-    // Load the initial shader
     loadShader(window.gShaderID);
-    
-    // Initialize interaction buttons
     interactionButtonsInit();
 }

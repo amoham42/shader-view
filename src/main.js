@@ -4,8 +4,9 @@ import './css/style.css'
 
 import "./js/libs/piLibs.js";
 import "./js/libs/effect.js";
+import "./js/quality.js";
 import { watchInit } from "./js/libs/shadertoy.js";
-import { populateHistoryItems } from "./js/ui.js";
+import { populateHistoryItems, uiSetup } from "./js/ui.js";
 
 // 3. Handle global variables
 window.gShaderID = "WcKXDV";
@@ -16,6 +17,8 @@ window.gPaused = false;
 window.gMuted = true;
 
 document.addEventListener("DOMContentLoaded", () => {
+  uiSetup();
+  
   if (typeof watchInit === "function") watchInit();
   else console.error("watchInit function not found!");
 });
