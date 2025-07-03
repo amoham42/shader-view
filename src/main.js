@@ -4,7 +4,7 @@ import './css/style.css'
 
 import "./js/libs/piLibs.js";
 import "./js/libs/effect.js";
-import "./js/quality.js";
+import { initQualityManager } from "./js/quality.js";
 import { watchInit } from "./js/libs/shadertoy.js";
 import { populateHistoryItems, uiSetup } from "./js/ui.js";
 
@@ -18,12 +18,8 @@ window.gMuted = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   uiSetup();
-  
-  if (typeof watchInit === "function") watchInit();
-  else console.error("watchInit function not found!");
-});
+  watchInit();
 
-document.addEventListener('DOMContentLoaded', () => {
   const btn = document.querySelector('button[title="Snapshot"]');
   const canvas = document.getElementById('demogl');
 
@@ -43,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
       1 
     );
   });
+
+  initQualityManager();
 });
 
 async function getShaderData(shaderIDs) {
@@ -92,8 +90,7 @@ async function getShaderData(shaderIDs) {
 getShaderData([
   "WcKXDV", "MsXfz4", "NslGRN", "Ms2SD1", "tdG3Rd", "33tGzN", "WsSBzh", "3lsSzf", "4ttSWf", "XfyXRV"
 ]).then(data => {
-  console.log(data);
     populateHistoryItems(data);
   }).catch(error => {
     console.error("Error fetching shader data:", error);
-  });
+});

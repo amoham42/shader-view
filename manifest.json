@@ -3,6 +3,11 @@
     "name": "Shadertoy New Tab",
     "version": "1.0",
     "description": "Display random Shadertoy shaders on new tabs",
+    "icons": {
+        "16": "icons/shader_view_icon.ico",
+        "48": "icons/shader_view_icon.ico",
+        "128": "icons/shader_view_icon.ico"
+    },
     "permissions": [
         "activeTab",
         "storage"
@@ -11,9 +16,6 @@
         "https://www.shadertoy.com/*"
     ],
     "chrome_url_overrides": {
-        "newtab": "src/newtab.html"
-    },
-    "action": {
-        "default_popup": "src/popup.html"
+        "newtab": "index.html"
     }
 }

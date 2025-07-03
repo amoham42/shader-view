@@ -64,6 +64,7 @@ export class EffectPass {
         this.mTextureCallbackObj = obj;
         this.mForceMuted = forceMuted;
         this.mForcePaused = forcePaused;
+        this.mQualityScale = 1.0;
     }
     MakeHeader_Image() {
         let header = "";
@@ -2800,10 +2801,8 @@ export class Effect {
         };
 
         let bestAttemptFallback = function () {
-            let devicePixelRatio = window.devicePixelRatio || 1;
-            let xres = Math.round(me.mCanvas.offsetWidth * devicePixelRatio) | 0;
-            let yres = Math.round(me.mCanvas.offsetHeight * devicePixelRatio) | 0;
-            iResize(xres, yres);
+            me.SetQualityScale(me.mQualityScale);
+
         };
 
         if (!window.ResizeObserver) {
@@ -2824,9 +2823,17 @@ export class Effect {
 
                 else {
                     let box = entry.devicePixelContentBoxSize[0];
-                    let xres = box.inlineSize;
-                    let yres = box.blockSize;
-                    iResize(xres, yres);
+                    const xres = box.inlineSize;
+                    const yres = box.blockSize;
+                    
+                    const scaledXres = Math.max(Math.round(xres * me.mQualityScale), 400);
+                    const scaledYres = Math.max(Math.round(yres * me.mQualityScale), 300);
+
+                    me.mCanvas.width = scaledXres;
+                    me.mCanvas.height = scaledYres;
+                    me.mXres = scaledXres;
+                    me.mYres = scaledYres;
+                    me.ResizeBuffers(scaledXres, scaledYres);
                 }
             });
             try {
@@ -3039,6 +3046,26 @@ export class Effect {
         return this.mPasses[passid].mHeaderLength +
             this.mRenderer.GetShaderHeaderLines(1);
     }
+
+    SetQualityScale(scale) {
+        this.mQualityScale = scale;
+        let container = this.mCanvas.parentElement;
+        if (container) {
+            let devicePixelRatio = window.devicePixelRatio || 1;
+            let xres = Math.round(container.offsetWidth * devicePixelRatio) | 0;
+            let yres = Math.round(container.offsetHeight * devicePixelRatio) | 0;
+            
+            let scaledXres = Math.round(xres * this.mQualityScale) | 0;
+            let scaledYres = Math.round(yres * this.mQualityScale) | 0;
+            
+            this.mCanvas.width = scaledXres;
+            this.mCanvas.height = scaledYres;
+            this.mXres = scaledXres;
+            this.mYres = scaledYres;
+            this.ResizeBuffers(scaledXres, scaledYres);
+        }
+    }
+
     ToggleVolume() {
         this.mForceMuted = !this.mForceMuted;
 

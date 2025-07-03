@@ -214,6 +214,12 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
         window.gShaderToy.Compile( function (worked) {
             if (!worked) return;
             if (window.gShaderToy.mIsPaused) window.gShaderToy.Stop();
+            
+            // Apply quality setting after shader is compiled
+            if (window.qualityManager) {
+                window.qualityManager.applyQuality();
+            }
+            
             window.gShaderToy.startRendering();
         });
     }

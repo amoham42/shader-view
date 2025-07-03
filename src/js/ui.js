@@ -1,5 +1,5 @@
 import { loadShader } from './libs/shadertoy.js';
-// import { QualityManager } from './quality.js';
+import { initQualityManager } from './quality.js';
 
 function setupToggle({
     toggleSelector,
@@ -23,36 +23,55 @@ function setupToggle({
 
 export function populateHistoryItems(data) {
     const historyContent = document.querySelector('.history__content');
-    
-    data.forEach((item, index) => {
+    // clear any existing items
+    historyContent.innerHTML = '';
+  
+    // always render 10 slots
+    for (let i = 0; i < 10; i++) {
       const historyItem = document.createElement('div');
-      historyItem.className = 'history__item cursor-pointer hover:opacity-80 transition-opacity';
-      
-      const img = document.createElement('img');
-      img.src = item.imageUrl;
-      img.alt = `Item ${index + 1}`;
-      img.className = 'item__image';
-      
-      const textOverlay = document.createElement('div');
-      textOverlay.className = 'item__text-overlay';
-      textOverlay.textContent = item.text;
-      
-      // Add click event listener to change shader
-      historyItem.addEventListener('click', () => {
-        console.log(`Loading shader: ${item.id}`);
-        loadShader(item.id);
-        
-        const closeBtn = document.querySelector(".history__close");
-        if (closeBtn) closeBtn.click();
-      });
-      
-      historyItem.appendChild(img);
-      historyItem.appendChild(textOverlay);
-      historyContent.appendChild(historyItem);
-    });
-}
+      historyItem.className = 'history__item transition-opacity';
+  
+      const item = data[i];
+      if (item) {
+        // real data → clickable
+        historyItem.classList.add(
+          'cursor-pointer',
+          'hover:opacity-80'
+        );
+  
+        const img = document.createElement('img');
+        img.src = item.imageUrl;
+        img.alt = `Item ${i + 1}`;
+        img.className = 'item__image';
+  
+        const textOverlay = document.createElement('div');
+        textOverlay.className = 'item__text-overlay';
+        textOverlay.textContent = item.text;
+  
+        historyItem.addEventListener('click', () => {
+          console.log(`Loading shader: ${item.id}`);
+          loadShader(item.id);
+  
+          const closeBtn = document.querySelector('.history__close');
+          if (closeBtn) closeBtn.click();
+        });
+  
+        historyItem.appendChild(img);
+        historyItem.appendChild(textOverlay);
+      } else {
+        // placeholder → non-clickable
+        historyItem.classList.add('cursor-default');
 
-// One-time UI setup - should only be called once
+        const img = document.createElement('img');
+        img.src = '/placeholder-600x400.png';
+        img.className = 'item__image';
+        historyItem.appendChild(img);
+      }
+  
+      historyContent.appendChild(historyItem);
+    }
+  }
+
 export function uiSetup() {
     let timeout;
     const body = document.body;
