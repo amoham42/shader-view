@@ -3,21 +3,31 @@ class QualityManager {
     this.canvas = document.getElementById('demogl');
     this.qualitySelect = document.getElementById('quality-select');
 
-    this.qualities = ['Low', 'Medium', 'High'];
+    this.qualities = ['Low', 'Medium', 'High', 'Ultra'];
     this.currentQuality = 'High';
+    this.boundOnSelectChange = this.onSelectChange.bind(this);
+    this.boundApplyQuality = this.applyQuality.bind(this);
 
     this.init();
   }
 
   async init() {
     await this.loadQualitySetting();
-    
-    // Initialize the select with the current quality
     this.qualitySelect.value = this.currentQuality;
 
     this.qualitySelect.addEventListener(
-      'change', this.onSelectChange.bind(this)
+      'change', this.boundOnSelectChange
     );
+  }
+
+  dispose() {
+    if (this.qualitySelect) {
+      this.qualitySelect.removeEventListener('change', this.boundOnSelectChange);
+    }
+    
+    if (this.boundResizeHandler) {
+      window.removeEventListener('resize', this.boundResizeHandler);
+    }
   }
 
   onSelectChange(e) {
@@ -61,7 +71,7 @@ class QualityManager {
 
   applyQuality() {
     const resScale = this.getResolutionScale();
-    if (window.gShaderToy && window.gShaderToy.mEffect) {
+    if (window.gShaderToy && window.gShaderToy.mEffect && window.gShaderToy.mCreated && !window.gShaderToy.mDisposed) {
       window.gShaderToy.mEffect.SetQualityScale(resScale);
     }
     this.canvas.style.width = `100%`;
@@ -71,10 +81,14 @@ class QualityManager {
 
 export function initQualityManager() {
   window.qualityManager = new QualityManager();
-  window.addEventListener('resize', () => {
+  
+  // Store bound function for cleanup
+  window.qualityManager.boundResizeHandler = () => {
     if (window.qualityManager) {
       window.qualityManager.applyQuality();
     }
-  });
+  };
+  
+  window.addEventListener('resize', window.qualityManager.boundResizeHandler);
   window.qualityManager.qualitySelect.value = window.qualityManager.currentQuality;
 }

@@ -7,7 +7,6 @@ import {
     piExitFullScreen,
     piGetSourceElement
 } from './piLibs.js';
-import { updateShaderInfo } from "../ui.js";
 import { Effect } from "./effect.js";
 window.gShaderToy = null;
 
@@ -28,6 +27,8 @@ export class ShaderToy {
         this.mForceFrame = true;
         this.mInfo = null;
         this.mCode = null;
+        this.mAnimationFrameId = null;
+        this.mDisposed = false;
 
         this.mCanvas = document.getElementById("demogl");
         this.mCanvas.tabIndex = "0";
@@ -49,7 +50,6 @@ export class ShaderToy {
         this.mMousePosX = 0;
         this.mMousePosY = 0;
 
-        // --- audio context ---------------------
         this.mCanvas.onmousedown = function (ev) {
             var pos = piGetCoords(me.mCanvas);
             me.mMouseOriX = (ev.pageX - pos.mX) * me.mCanvas.width / me.mCanvas.offsetWidth;
@@ -75,18 +75,22 @@ export class ShaderToy {
         };
 
         this.mCanvas.onkeydown = function (ev) {
-            me.mEffect.SetKeyDown(0, ev.keyCode);
-            if (me.mIsPaused) me.mForceFrame = true;
+            if (me.mEffect && !me.mDisposed) {
+                me.mEffect.SetKeyDown(0, ev.keyCode);
+                if (me.mIsPaused) me.mForceFrame = true;
+            }
         };
         this.mCanvas.onkeyup = function (ev) {
-            me.mEffect.SetKeyUp(0, ev.keyCode);
-            if (me.mIsPaused) me.mForceFrame = true;
+            if (me.mEffect && !me.mDisposed) {
+                me.mEffect.SetKeyUp(0, ev.keyCode);
+                if (me.mIsPaused) me.mForceFrame = true;
+            }
         };
 
         this.mCanvas.ondblclick = function (ev) {
             if (piIsFullScreen() == false) {
                 piRequestFullScreen(me.mCanvas);
-                me.mCanvas.focus(); // put mouse/keyboard focus on canvas
+                me.mCanvas.focus();
             } else {
                 piExitFullScreen();
             }
@@ -100,9 +104,16 @@ export class ShaderToy {
     startRendering() {
         var me = this;
         function renderLoop2() {
-            requestAnimFrame(renderLoop2);
-            if (me.mIsPaused && !me.mForceFrame) {
-                me.mEffect.UpdateInputs(0, false);
+            if (me.mDisposed || !me.mCreated || !me.mEffect) {
+                return;
+            }
+            
+            me.mAnimationFrameId = requestAnimFrame(renderLoop2);
+            
+             if (me.mIsPaused && !me.mForceFrame) {
+                if (me.mEffect && !me.mDisposed) {
+                    me.mEffect.UpdateInputs(0, false);
+                }
                 return;
             }
 
@@ -111,16 +122,20 @@ export class ShaderToy {
             var ltime = me.mTOffset + time - me.mTo;
             if (me.mIsPaused) ltime = me.mTf; else me.mTf = ltime;
             var dtime = 1000.0 / 60.0;
-            me.mEffect.Paint(ltime / 1000.0, dtime / 1000.0, 60, me.mMouseOriX, me.mMouseOriY, me.mMousePosX, me.mMousePosY, me.mIsPaused);
-            me.mFpsFrame++;
+            
+            if (me.mEffect && !me.mDisposed) {
+                me.mEffect.Paint(ltime / 1000.0, dtime / 1000.0, 60, me.mMouseOriX, me.mMouseOriY, me.mMousePosX, me.mMousePosY, me.mIsPaused);
+                me.mFpsFrame++;
+            }
         }
 
         renderLoop2();
     }
-    //---------------------------------
     Stop() {
         this.mIsPaused = true;
-        this.mEffect.StopOutputs();
+        if (this.mEffect && !this.mDisposed) {
+            this.mEffect.StopOutputs();
+        }
     }
     pauseTime() {
         var time = getRealTime();
@@ -133,7 +148,7 @@ export class ShaderToy {
             this.mTo = time;
             this.mIsPaused = false;
             this.mEffect.ResumeOutputs();
-            this.mCanvas.focus(); // put mouse/keyboard focus on canvas
+            this.mCanvas.focus();
         }
     }
     resetTime() {
@@ -144,7 +159,7 @@ export class ShaderToy {
         this.mFpsFrame = 0;
         this.mForceFrame = true;
         this.mEffect.ResetTime();
-        this.mCanvas.focus(); // put mouse/keyboard focus on canvas
+        this.mCanvas.focus();
     }
     PauseInput(id) {
         return this.mEffect.PauseInput(0, id);
@@ -192,9 +207,34 @@ export class ShaderToy {
     Compile(onResolve) {
         this.mEffect.Compile(true, onResolve);
     }
+
+    dispose() {
+        if (!this.mCreated || this.mDisposed) return;
+        
+        this.mDisposed = true;
+        
+        if (this.mAnimationFrameId) {
+            cancelAnimationFrame(this.mAnimationFrameId);
+            this.mAnimationFrameId = null;
+        }
+        
+        this.Stop();
+        if (this.mEffect) {
+            this.mEffect.StopOutputs();
+            this.mEffect.dispose();
+            this.mEffect = null;
+        }
+
+        this.mCreated = false;
+    }
 }
 
 export function iCompileAndStart( viewerParent, jsnShader ) {
+
+    if (window.gShaderToy && window.gShaderToy.mCreated) {
+        window.gShaderToy.dispose();
+    }
+    
     window.gShaderToy = new ShaderToy( viewerParent, null );
     if( !window.gShaderToy.mCreated ) {
         if( gInvisIfFail!==null ) {
@@ -215,7 +255,6 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
             if (!worked) return;
             if (window.gShaderToy.mIsPaused) window.gShaderToy.Stop();
             
-            // Apply quality setting after shader is compiled
             if (window.qualityManager) {
                 window.qualityManager.applyQuality();
             }
@@ -270,36 +309,43 @@ function interactionButtonsInit() {
 }
 
 export function loadShader(shaderID) {
-    // Update global shader ID
     window.gShaderID = shaderID;
+
+    if (window.gShaderToy && window.gShaderToy.mCreated) {
+        window.gShaderToy.dispose();
+    }
     
-  
-    var viewerParent = document.getElementById("player");
-    
-    // Clear any existing preview images (but keep the noWebGL image)
+    let viewerParent = document.getElementById("player");
     const existingImages = viewerParent.querySelectorAll('img:not(#noWebGL_ShaderImage)');
     existingImages.forEach(img => img.remove());
 
-    var httpReq = new XMLHttpRequest();
+    let httpReq = new XMLHttpRequest();
     httpReq.open("POST", "http://localhost:3000/shadertoy", true);
     httpReq.responseType = "json";
     httpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    var str = "{ \"shaders\" : [\"" + shaderID + "\"] }";
+    let str = "{ \"shaders\" : [\"" + shaderID + "\"] }";
     str = "s=" + encodeURIComponent(str) + "&nt=0&nl=0&np=0";
     
     httpReq.onload = function() {
-        var jsnShader = httpReq.response;
+        let jsnShader = httpReq.response;
         if (!jsnShader || !jsnShader[0] || !jsnShader[0].info) {
             console.error("Failed to load shader data:", httpReq.status, httpReq.statusText);
             return;
         }
 
-        // Update UI with new shader info
-        updateShaderInfo(jsnShader[0].info);
-        
+        // Use global shaderViewUI instance if available, otherwise use standalone function
+        if (window.shaderViewUI && window.shaderViewUI.updateShaderInfo) {
+            window.shaderViewUI.updateShaderInfo(jsnShader[0].info);
+        } else {
+            // Fallback: dispatch custom event for updateShaderInfo
+            const event = new CustomEvent('updateShaderInfo', { 
+                detail: jsnShader[0].info 
+            });
+            document.dispatchEvent(event);
+        }
         if (jsnShader[0].info.usePreview === 1) {
             let url = "/media/shaders/" + shaderID + ".jpg";
-            var img = new Image();
+            let img = new Image();
             img.style = "width:100%;";
             img.onload = function () {
                 viewerParent.appendChild(img);
@@ -309,7 +355,6 @@ export function loadShader(shaderID) {
             };
             img.src = url;
         } else {
-            // This will create a new ShaderToy object
             iCompileAndStart(viewerParent, jsnShader);
         }
     }
@@ -322,8 +367,7 @@ export function loadShader(shaderID) {
 }
 
 export function watchInit() {
-    //-- shadertoy --------------------------------------------------------
-    var viewerParent = document.getElementById("player");
+
     document.body.addEventListener( "keydown", function(e) {
         var ele = piGetSourceElement(e)
         if( e.key === 8 && ele === document.body )

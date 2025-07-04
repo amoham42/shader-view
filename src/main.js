@@ -6,7 +6,7 @@ import "./js/libs/piLibs.js";
 import "./js/libs/effect.js";
 import { initQualityManager } from "./js/quality.js";
 import { watchInit } from "./js/libs/shadertoy.js";
-import { populateHistoryItems, uiSetup } from "./js/ui.js";
+import {  ShaderViewUI } from "./js/ui.js";
 
 // 3. Handle global variables
 window.gShaderID = "WcKXDV";
@@ -16,8 +16,20 @@ window.gShowGui = false;
 window.gPaused = false;
 window.gMuted = true;
 
+let shaderViewUI = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-  uiSetup();
+  shaderViewUI = new ShaderViewUI();
+  window.shaderViewUI = shaderViewUI; // Make it globally accessible
+  shaderViewUI.init();
+  
+  // Add fallback event listener for updateShaderInfo
+  document.addEventListener('updateShaderInfo', (event) => {
+    if (shaderViewUI && shaderViewUI.updateShaderInfo) {
+      shaderViewUI.updateShaderInfo(event.detail);
+    }
+  });
+  
   watchInit();
 
   const btn = document.querySelector('button[title="Snapshot"]');
@@ -41,6 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initQualityManager();
+});
+
+// Add cleanup when page unloads
+window.addEventListener('beforeunload', () => {
+  if (shaderViewUI) {
+    shaderViewUI.dispose();
+  }
+  
+  if (window.gShaderToy && window.gShaderToy.mCreated) {
+    window.gShaderToy.dispose();
+  }
+  
+  if (window.qualityManager) {
+    window.qualityManager.dispose();
+    window.qualityManager = null;
+  }
+  
+  // Clean up global references
+  window.shaderViewUI = null;
 });
 
 async function getShaderData(shaderIDs) {
@@ -87,10 +118,29 @@ async function getShaderData(shaderIDs) {
   });
 }
 
+// const { shaderHistory } = await chrome.storage.local.get(['shaderHistory']);
+// if(shaderHistory.length >= 10) {
+//   shaderHistory = shaderHistory.slice(0, 9);
+// }
+// getShaderData(shaderHistory).then(data => {
+//   populateHistoryItems(data);
+// }).catch(error => {
+//   console.error("Error fetching shader history:", error);
+// });
+
 getShaderData([
   "WcKXDV", "MsXfz4", "NslGRN", "Ms2SD1", "tdG3Rd", "33tGzN", "WsSBzh", "3lsSzf", "4ttSWf", "XfyXRV"
 ]).then(data => {
-    populateHistoryItems(data);
+    if (shaderViewUI) {
+      shaderViewUI.populateHistoryItems(data);
+    }
   }).catch(error => {
     console.error("Error fetching shader data:", error);
 });
+
+// const { shaderHistory } = await chrome.storage.local.get(['shaderHistory']);
+// getShaderData(shaderHistory).then(data => {
+//     populateHistoryItems(data);
+//   }).catch(error => {
+//     console.error("Error fetching shader history:", error);
+// });

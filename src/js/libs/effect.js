@@ -2813,6 +2813,11 @@ export class Effect {
 
         else {
             this.mRO = new ResizeObserver(function (entries, observer) {
+                // Safety check: ensure effect is not disposed
+                if (!me.mCanvas || !me.mRenderer || !me.mCreated) {
+                    return;
+                }
+                
                 var entry = entries[0];
                 if (!entry['devicePixelContentBoxSize']) {
                     observer.unobserve(me.mCanvas);
@@ -2880,6 +2885,9 @@ export class Effect {
         }
     }
     ResizeBuffer(i, xres, yres, skipIfNotExists) {
+        // Safety check: ensure renderer and buffers are valid
+        if (!this.mRenderer || !this.mBuffers || !this.mBuffers[i]) return;
+        
         if (skipIfNotExists && this.mBuffers[i].mTexture[0] === null) return;
 
         let oldXres = this.mBuffers[i].mResolution[0];
@@ -2924,11 +2932,19 @@ export class Effect {
                 this.mRenderer.AttachTextures(1, this.mBuffers[i].mTexture[1], null, null, null);
                 this.mRenderer.DrawUnitQuad_XY(l1);
 
-                // Deallocate old memory
-                this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[0]);
-                this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[0]);
-                this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[1]);
-                this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[1]);
+                // Deallocate old memory safely
+                if (this.mBuffers[i].mTexture[0] && this.mBuffers[i].mTexture[0].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[0]);
+                }
+                if (this.mBuffers[i].mTarget[0] && this.mBuffers[i].mTarget[0].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[0]);
+                }
+                if (this.mBuffers[i].mTexture[1] && this.mBuffers[i].mTexture[1].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[1]);
+                }
+                if (this.mBuffers[i].mTarget[1] && this.mBuffers[i].mTarget[1].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[1]);
+                }
                 //this.mRenderer.DestroyTexture(this.mBuffers[i].thumbnailTexture);
             }
 
@@ -3048,6 +3064,9 @@ export class Effect {
     }
 
     SetQualityScale(scale) {
+        // Safety check: ensure effect is not disposed and renderer is valid
+        if (!this.mRenderer || !this.mCanvas || !this.mBuffers) return;
+        
         this.mQualityScale = scale;
         let container = this.mCanvas.parentElement;
         if (container) {
@@ -3509,6 +3528,78 @@ export class Effect {
 
         return result;
     }
+    dispose() {
+        // Disconnect ResizeObserver to prevent further callbacks
+        if (this.mRO) {
+            this.mRO.disconnect();
+            this.mRO = null;
+        }
+        
+        // Clean up all buffers
+        if (this.mRenderer && this.mBuffers) {
+            for (let i = 0; i < this.mMaxBuffers; i++) {
+                if (this.mBuffers[i].mTexture[0] && this.mBuffers[i].mTexture[0].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[0]);
+                }
+                if (this.mBuffers[i].mTexture[1] && this.mBuffers[i].mTexture[1].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mBuffers[i].mTexture[1]);
+                }
+                if (this.mBuffers[i].mTarget[0] && this.mBuffers[i].mTarget[0].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[0]);
+                }
+                if (this.mBuffers[i].mTarget[1] && this.mBuffers[i].mTarget[1].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mBuffers[i].mTarget[1]);
+                }
+                
+                // Reset buffer references
+                this.mBuffers[i].mTexture = [null, null];
+                this.mBuffers[i].mTarget = [null, null];
+                this.mBuffers[i].mResolution = [0, 0];
+                this.mBuffers[i].mLastRenderDone = 0;
+            }
+        }
+        
+        // Clean up cube buffers
+        if (this.mRenderer && this.mCubeBuffers) {
+            for (let i = 0; i < this.mMaxCubeBuffers; i++) {
+                if (this.mCubeBuffers[i].mTexture[0] && this.mCubeBuffers[i].mTexture[0].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mCubeBuffers[i].mTexture[0]);
+                }
+                if (this.mCubeBuffers[i].mTexture[1] && this.mCubeBuffers[i].mTexture[1].mObjectID) {
+                    this.mRenderer.DestroyTexture(this.mCubeBuffers[i].mTexture[1]);
+                }
+                if (this.mCubeBuffers[i].mTarget[0] && this.mCubeBuffers[i].mTarget[0].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mCubeBuffers[i].mTarget[0]);
+                }
+                if (this.mCubeBuffers[i].mTarget[1] && this.mCubeBuffers[i].mTarget[1].mObjectID) {
+                    this.mRenderer.DestroyRenderTarget(this.mCubeBuffers[i].mTarget[1]);
+                }
+                
+                // Reset cube buffer references
+                this.mCubeBuffers[i].mTexture = [null, null];
+                this.mCubeBuffers[i].mTarget = [null, null];
+                this.mCubeBuffers[i].mResolution = [0, 0];
+                this.mCubeBuffers[i].mLastRenderDone = 0;
+            }
+        }
+        
+        // Clean up keyboard texture
+        if (this.mRenderer && this.mKeyboard && this.mKeyboard.mTexture && this.mKeyboard.mTexture.mObjectID) {
+            this.mRenderer.DestroyTexture(this.mKeyboard.mTexture);
+            this.mKeyboard.mTexture = null;
+        }
+        
+        // Mark as not created first to stop any callbacks
+        this.mCreated = false;
+        
+        // Clear references to prevent further use
+        this.mRenderer = null;
+        this.mBuffers = null;
+        this.mCubeBuffers = null;
+        this.mKeyboard = null;
+        this.mCanvas = null;
+    }
+
     calcFlags() {
         let flagVR = false;
         let flagWebcam = false;
