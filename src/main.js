@@ -1,77 +1,27 @@
 "use strict";
 
 import './css/style.css'
-
-import "./js/libs/piLibs.js";
-import "./js/libs/effect.js";
-import { initQualityManager } from "./js/quality.js";
-import { watchInit } from "./js/libs/shadertoy.js";
-import {  ShaderViewUI } from "./js/ui.js";
+import { ShaderViewUI } from "./js/ui.js";
+import { ShaderHistoryManager } from "./js/history.js";
 
 // 3. Handle global variables
 window.gShaderID = "WcKXDV";
-window.gInvisIfFail = null;
-window.gTime = "10";
-window.gShowGui = false;
-window.gPaused = false;
-window.gMuted = true;
-
-let shaderViewUI = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-  shaderViewUI = new ShaderViewUI();
-  window.shaderViewUI = shaderViewUI; // Make it globally accessible
-  shaderViewUI.init();
-  
-  // Add fallback event listener for updateShaderInfo
-  document.addEventListener('updateShaderInfo', (event) => {
-    if (shaderViewUI && shaderViewUI.updateShaderInfo) {
-      shaderViewUI.updateShaderInfo(event.detail);
-    }
-  });
-  
-  watchInit();
-
-  const btn = document.querySelector('button[title="Snapshot"]');
-  const canvas = document.getElementById('demogl');
-
-  btn.addEventListener('click', () => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        const link = document.createElement('a');
-        link.download = 'snapshot.png';
-        link.href = URL.createObjectURL(blob);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-      },
-      'image/png',
-      1 
-    );
-  });
-
-  initQualityManager();
+  window.shaderViewUI = new ShaderViewUI();
+  window.shaderHistoryManager = new ShaderHistoryManager();
+  window.shaderViewUI.init();
 });
 
-// Add cleanup when page unloads
 window.addEventListener('beforeunload', () => {
-  if (shaderViewUI) {
-    shaderViewUI.dispose();
+  if (window.shaderViewUI) {
+    window.shaderViewUI.dispose();
   }
   
   if (window.gShaderToy && window.gShaderToy.mCreated) {
     window.gShaderToy.dispose();
   }
-  
-  if (window.qualityManager) {
-    window.qualityManager.dispose();
-    window.qualityManager = null;
-  }
-  
-  // Clean up global references
-  window.shaderViewUI = null;
+    window.shaderViewUI = null;
 });
 
 async function getShaderData(shaderIDs) {
@@ -118,29 +68,24 @@ async function getShaderData(shaderIDs) {
   });
 }
 
-// const { shaderHistory } = await chrome.storage.local.get(['shaderHistory']);
-// if(shaderHistory.length >= 10) {
-//   shaderHistory = shaderHistory.slice(0, 9);
-// }
-// getShaderData(shaderHistory).then(data => {
-//   populateHistoryItems(data);
+// shaderHistoryManager.loadHistory().then(data => {
+//   getShaderData(data).then(newData => {
+//     if (shaderViewUI) shaderViewUI.populateHistoryItems(newData);
+//     shaderHistoryManager.addToHistory(newData[0].id);
+//     shaderHistoryManager.saveHistory();
+//   }).catch(error => {
+//     console.error("Error fetching shader data:", error);
+//   });
 // }).catch(error => {
-//   console.error("Error fetching shader history:", error);
+//   console.error("Error loading shader history:", error);
 // });
 
 getShaderData([
   "WcKXDV", "MsXfz4", "NslGRN", "Ms2SD1", "tdG3Rd", "33tGzN", "WsSBzh", "3lsSzf", "4ttSWf", "XfyXRV"
 ]).then(data => {
-    if (shaderViewUI) {
-      shaderViewUI.populateHistoryItems(data);
+    if (window.shaderViewUI) {
+      window.shaderViewUI.populateHistoryItems(data);
     }
   }).catch(error => {
     console.error("Error fetching shader data:", error);
 });
-
-// const { shaderHistory } = await chrome.storage.local.get(['shaderHistory']);
-// getShaderData(shaderHistory).then(data => {
-//     populateHistoryItems(data);
-//   }).catch(error => {
-//     console.error("Error fetching shader history:", error);
-// });

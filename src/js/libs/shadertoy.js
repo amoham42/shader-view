@@ -19,11 +19,11 @@ export class ShaderToy {
         this.mHttpReq = null;
         this.mEffect = null;
         this.mTo = null;
-        this.mTOffset = gTime * 1000;
+        this.mTOffset = 10 * 1000;
         this.mCanvas = null;
         this.mFpsFrame = 0;
         this.mFpsTo = null;
-        this.mIsPaused = gPaused;
+        this.mIsPaused = false;
         this.mForceFrame = true;
         this.mInfo = null;
         this.mCode = null;
@@ -94,11 +94,12 @@ export class ShaderToy {
             } else {
                 piExitFullScreen();
             }
+            if (me.mIsPaused) me.mForceFrame = true;
         };
 
         var resizeCB = function (xres, yres) { me.mForceFrame = true; };
         var crashCB = function () { };
-        this.mEffect = new Effect(null, this.mAudioContext, this.mCanvas, this.RefreshTexturThumbail, this, gMuted, false, resizeCB, crashCB);
+        this.mEffect = new Effect(null, this.mAudioContext, this.mCanvas, this.RefreshTexturThumbail, this, true, false, resizeCB, crashCB);
         this.mCreated = true;
     }
     startRendering() {
@@ -131,6 +132,7 @@ export class ShaderToy {
 
         renderLoop2();
     }
+    
     Stop() {
         this.mIsPaused = true;
         if (this.mEffect && !this.mDisposed) {
@@ -255,8 +257,8 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
             if (!worked) return;
             if (window.gShaderToy.mIsPaused) window.gShaderToy.Stop();
             
-            if (window.qualityManager) {
-                window.qualityManager.applyQuality();
+            if (window.shaderViewUI) {
+                window.shaderViewUI.applyQuality();
             }
             
             window.gShaderToy.startRendering();
@@ -264,48 +266,15 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
     }
 }
 
-function interactionButtonsInit() {
-    const rewindBtn     = document.querySelector('button[title="Rewind"]');
-    const pauseBtn      = document.querySelector('button[title="Pause"]');
-    const fullscreenBtn = document.querySelector('button[title="Fullscreen"]');
-  
-    if (!rewindBtn || !pauseBtn || !fullscreenBtn) {
-        console.warn('One or more interaction buttons not found');
-        return;
+export function toggleFullscreen() {
+    const canvas = window.gShaderToy.mCanvas;
+    if (piIsFullScreen() == false) {
+        piRequestFullScreen(canvas);
+        canvas.focus();
+    } else {
+        piExitFullScreen();
     }
-
-    rewindBtn.addEventListener('click', () => {
-        if (window.gShaderToy) {
-            window.gShaderToy.resetTime();
-        }
-    });
-  
-    pauseBtn.addEventListener('click', () => {
-        if (!window.gShaderToy) return;
-        window.gShaderToy.pauseTime();
-        const pauseIcon = document.getElementById('pause__icon');
-        const playIcon = document.getElementById('play__icon');
-        if (window.gShaderToy.mIsPaused) {
-            pauseIcon.classList.add('hidden');
-            playIcon.classList.remove('hidden');
-            pauseBtn.title = 'Play';
-        } else {
-            pauseIcon.classList.remove('hidden');
-            playIcon.classList.add('hidden');
-            pauseBtn.title = 'Pause';
-        }
-    });
-  
-    fullscreenBtn.addEventListener('click', () => {
-        if (!window.gShaderToy) return;
-        const canvas = window.gShaderToy.mCanvas;
-        if (!piIsFullScreen()) {
-            piRequestFullScreen(canvas);
-            canvas.focus();
-        } else {
-            piExitFullScreen();
-        }
-    });
+    if (window.gShaderToy.mIsPaused) window.gShaderToy.mForceFrame = true;
 }
 
 export function loadShader(shaderID) {
@@ -333,16 +302,8 @@ export function loadShader(shaderID) {
             return;
         }
 
-        // Use global shaderViewUI instance if available, otherwise use standalone function
-        if (window.shaderViewUI && window.shaderViewUI.updateShaderInfo) {
-            window.shaderViewUI.updateShaderInfo(jsnShader[0].info);
-        } else {
-            // Fallback: dispatch custom event for updateShaderInfo
-            const event = new CustomEvent('updateShaderInfo', { 
-                detail: jsnShader[0].info 
-            });
-            document.dispatchEvent(event);
-        }
+        if (window.shaderViewUI) window.shaderViewUI.updateShaderInfo(jsnShader[0].info);
+        
         if (jsnShader[0].info.usePreview === 1) {
             let url = "/media/shaders/" + shaderID + ".jpg";
             let img = new Image();
@@ -364,16 +325,4 @@ export function loadShader(shaderID) {
     };
     
     httpReq.send(str);
-}
-
-export function watchInit() {
-
-    document.body.addEventListener( "keydown", function(e) {
-        var ele = piGetSourceElement(e)
-        if( e.key === 8 && ele === document.body )
-            e.preventDefault();
-    });
-
-    loadShader(window.gShaderID);
-    interactionButtonsInit();
 }

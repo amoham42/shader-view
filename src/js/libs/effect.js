@@ -3174,7 +3174,7 @@ export class Effect {
     }
     ResetTime() {
         this.mFrame = 0;
-        this.mAudioContext.resume();
+        // this.mAudioContext.resume();
 
         let num = this.mPasses.length;
         for (let i = 0; i < num; i++) {

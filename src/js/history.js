@@ -10,6 +10,9 @@ export class ShaderHistoryManager {
     try {
       const { shaderHistory } = await chrome.storage.local.get([HISTORY_STORAGE_KEY]);
       this.history = shaderHistory || [];
+      if(this.history.length >= MAX_HISTORY_SIZE) {
+        this.history = this.history.slice(0, MAX_HISTORY_SIZE - 1);
+      }
       return this.history;
     } catch (error) {
       console.error("Error loading shader history:", error);
