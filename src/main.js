@@ -68,24 +68,31 @@ async function getShaderData(shaderIDs) {
   });
 }
 
-// shaderHistoryManager.loadHistory().then(data => {
-//   getShaderData(data).then(newData => {
-//     if (shaderViewUI) shaderViewUI.populateHistoryItems(newData);
-//     shaderHistoryManager.addToHistory(newData[0].id);
-//     shaderHistoryManager.saveHistory();
+// fetch("https://raw.githubusercontent.com/amoham42/shader-view/main/public/shaders.txt")
+//   .then(res => res.text())
+//   .then(text => {
+//     const shaderIDs = JSON.parse(`[${text.trim()}]`);
+//     const randomIndex = Math.floor(Math.random() * shaderIDs.length);
+//     window.shaderHistoryManager.addToHistory(shaderIDs[randomIndex]);
+//     window.shaderHistoryManager.saveHistory();
+    
+//   }).then(() => {
+//     window.shaderHistoryManager.loadHistory().then(data => {
+//       getShaderData(data).then(newData => {
+//         if (window.shaderViewUI) window.shaderViewUI.populateHistoryItems(newData);
+//       }); 
+//     });
 //   }).catch(error => {
-//     console.error("Error fetching shader data:", error);
+//     console.error("Error loading shader history:", error);
 //   });
-// }).catch(error => {
-//   console.error("Error loading shader history:", error);
-// });
 
-getShaderData([
-  "WcKXDV", "MsXfz4", "NslGRN", "Ms2SD1", "tdG3Rd", "33tGzN", "WsSBzh", "3lsSzf", "4ttSWf", "XfyXRV"
-]).then(data => {
-    if (window.shaderViewUI) {
-      window.shaderViewUI.populateHistoryItems(data);
-    }
-  }).catch(error => {
-    console.error("Error fetching shader data:", error);
-});
+fetch("https://raw.githubusercontent.com/amoham42/shader-view/main/public/shaders.txt")
+  .then(res => res.text())
+  .then(text => {
+    const shaderIDs = JSON.parse(`[${text.trim()}]`);
+    return getShaderData(shaderIDs);
+  })
+  .then(data => {
+    window.shaderViewUI?.populateHistoryItems(data);
+  })
+  .catch(console.error);

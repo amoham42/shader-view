@@ -57,7 +57,6 @@ app.post("/shadertoy", (req, res) => {
     });
   });
 
-  // 6) stream the response body back to the client
   proxyReq.on("data", (chunk) => {
     res.write(chunk);
   });
