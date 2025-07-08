@@ -9,6 +9,7 @@
     <meta name="Author" content="Beautypi, Arman"/>
     <meta name="revisit-after" content="3 days"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="module" src="/src/main.js"></script>
   </head>
   <body class="bg-black absolute left-0 top-0 w-full h-full m-0 p-0 overflow-hidden">
      
@@ -71,14 +72,38 @@
   
         <div class="menu__packed">
           <button class="menu__item gap-4 cursor-pointer" title="Snapshot">
-            <img class="p-0 m-0" src="icons/screenshot.svg" alt="Snapshot" style="width:1.5rem; height:1.5rem;">
+            <svg class="p-0 m-0" width="1.5rem" height="1.5rem" style="enable-background:new 3 3 24 24;" version="1.1" viewBox="3 3 24 24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
+              <g>
+                <path d="M6,19V17c0-0.552-0.448-1-1-1H5c-0.552,0-1,0.448-1,1V19c0,0.552,0.448,1,1,1H5C5.552,20,6,19.552,6,19z"/>
+                <path d="M10,5L10,5c0,0.553,0.448,1,1,1H13c0.552,0,1-0.448,1-1V5c0-0.552-0.448-1-1-1H11C10.448,4,10,4.448,10,5z"/>
+                <path d="M5,14L5,14c0.553,0,1-0.448,1-1V11c0-0.552-0.448-1-1-1H5c-0.552,0-1,0.448-1,1V13C4,13.552,4.448,14,5,14z"/>
+                <path d="M23,6h1l0,1c0,0.552,0.448,1,1,1h0c0.552,0,1-0.448,1-1V6c0-1.105-0.895-2-2-2h-1c-0.552,0-1,0.448-1,1v0   C22,5.552,22.448,6,23,6z"/>
+                <path d="M16,5L16,5c0,0.552,0.448,1,1,1h2c0.552,0,1-0.448,1-1v0c0-0.552-0.448-1-1-1h-2C16.448,4,16,4.448,16,5z"/>
+                <path d="M7,24H6v-1c0-0.552-0.448-1-1-1H5c-0.552,0-1,0.448-1,1v1c0,1.105,0.895,2,2,2h1c0.552,0,1-0.448,1-1V25   C8,24.448,7.552,24,7,24z"/>
+                <path d="M6,7V6h1c0.552,0,1-0.448,1-1V5c0-0.552-0.448-1-1-1H6C4.895,4,4,4.895,4,6v1c0,0.552,0.448,1,1,1H5C5.552,8,6,7.552,6,7z"/>
+                <path d="M24,11l0,2.001c0,0.552,0.448,1,1,1h0c0.552,0,1-0.448,1-1V11c0-0.552-0.448-1-1-1h0C24.448,10,24,10.448,24,11z"/>
+              </g>
+              <g>
+                <path d="M25,16h-1.764c-0.758,0-1.45-0.428-1.789-1.106l-0.171-0.342C21.107,14.214,20.761,14,20.382,14h-4.764   c-0.379,0-0.725,0.214-0.894,0.553l-0.171,0.342C14.214,15.572,13.521,16,12.764,16H11c-0.552,0-1,0.448-1,1v8c0,0.552,0.448,1,1,1   h14c0.552,0,1-0.448,1-1v-8C26,16.448,25.552,16,25,16z M18,25c-2.209,0-4-1.791-4-4c0-2.209,1.791-4,4-4s4,1.791,4,4   C22,23.209,20.209,25,18,25z"/>
+                <circle cx="18" cy="21" r="2"/>
+              </g>
+            </svg>
             <span class="text-white josefin-medium">Snapshot</span>
           </button>
         </div>
   
         <div id="quality__value" class="menu__packed cursor-pointer">
           <button id="quality__button" class="menu__item gap-4" title="Quality">
-            <img class="p-0 m-0" src="icons/quality.svg" alt="Quality" style="width:1.5rem; height:1.5rem;">
+
+            <svg class="p-0 m-0" width="1.5rem" height="1.5rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+              <g id="SVGRepo_iconCarrier">
+              <path d="M6 17h17V3H6zm16-1H7v-3.386l1.771-1.771a1.38 1.38 0 0 0 1.402-.334l2.288-2.29 2.27 1.892a1.376 1.376 0 0 0 1.708.043l1.245-.933L22 12.681zm0-12v7.399l-4.035-3.234a.377.377 0 0 0-.493-.035l-1.633 1.225a.377.377 0 0 1-.468-.012l-2.706-2.256a.377.377 0 0 0-.509.023L9.466 9.8a.377.377 0 0 1-.533 0 .377.377 0 0 0-.533 0L7 11.2V4zm-6.5 1.521v-.043a.979.979 0 0 1 .979-.978A1.021 1.021 0 0 1 17.5 5.521a.979.979 0 0 1-.979.979h-.043a.981.981 0 0 1-.978-.979zM21 18.824l2.058 1.676L21 22.176V21H8v1.176L5.942 20.5 8 18.824V20h13zM3 5v10h1.176L2.5 17.058.824 15H2V5H.824L2.5 2.942 4.176 5z"/>
+
+              <path fill="none" d="M0 0h24v24H0z"/>
+              </g>
+              </svg>
             <span class="text-white josefin-medium">Quality</span>
           </button>
           <select id="quality-select" class="text-center text-white josefin-medium p-1">
@@ -112,33 +137,71 @@
           <div class="w-px h-10 bg-gray-400 p-0 m-0"></div>
           <div class="flex items-center text-white gap-4">
             <div class="flex flex-col items-center p-0 m-0">
-              <img class="mt-1" src="icons/like.svg" alt="Likes" style="width: 1.5rem; height: 1.5rem;"/>
+              <svg class="mt-1" width="1.5rem" height="1.5rem" viewBox="0 0 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="Dribbble-Light-Preview" transform="translate(-219.000000, -760.000000)" fill="#ffffff">
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                            <path d="M163,610.021159 L163,618.021159 C163,619.126159 163.93975,620.000159 165.1,620.000159 L167.199999,620.000159 L167.199999,608.000159 L165.1,608.000159 C163.93975,608.000159 163,608.916159 163,610.021159 M183.925446,611.355159 L182.100546,617.890159 C181.800246,619.131159 180.639996,620.000159 179.302297,620.000159 L169.299999,620.000159 L169.299999,608.021159 L171.104948,601.826159 C171.318098,600.509159 172.754498,599.625159 174.209798,600.157159 C175.080247,600.476159 175.599997,601.339159 175.599997,602.228159 L175.599997,607.021159 C175.599997,607.573159 176.070397,608.000159 176.649997,608.000159 L181.127196,608.000159 C182.974146,608.000159 184.340196,609.642159 183.925446,611.355159" id="like-[#1386]"></path>
+                        </g>
+                    </g>
+                </g>
+            </svg>
               <span class="like__impressions text-normal josefin-light mt-1"></span>
             </div>
           
             <div class="flex flex-col items-center p-0 m-0">
-              <img class="mt-1.5" src="icons/view.svg" alt="Views" style="width: 1.5rem; height: 1.5rem;"/>
+              <svg class="mt-1.5" width="1.5rem" height="1.5rem" style="enable-background:new 0 0 24 24;" version="1.1" viewBox="0 0 24 24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <g id="info"/>
+                <g id="icons">
+                    <path d="M12,4C7.3,4,3.2,6.9,1.2,11.1c-0.3,0.6-0.3,1.3,0,1.9C3.2,17.1,7.3,20,12,20s8.8-2.9,10.8-7.1   c0.3-0.6,0.3-1.3,0-1.9C20.8,6.9,16.7,4,12,4z M12,16c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4s4,1.8,4,4C16,14.2,14.2,16,12,16z" id="view" fill="#ffffff"/>
+                </g>
+            </svg>
               <span class="view__impressions text-normal josefin-light mt-0.5"></span>
             </div>
           </div>
   
           <div class="flex items-center gap-2 ml-auto">
             <button class="icon__button interaction__button my-1 p-0" title="Rewind">
-              <img class="w-[65%]" src="icons/rewind.svg">
+              <div class="w-[65%]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+                  <g id="SVGRepo_iconCarrier"> <path d="M21.9998 17.5737L21.9998 6.42632C21.9998 4.57895 20.3991 3.41122 19.0966 4.30838L13 8.76844L13 7.12303C13 5.50658 11.5327 4.48482 10.3388 5.26983L2.92136 10.1468C1.69288 10.9545 1.69288 13.0455 2.92135 13.8532L10.3388 18.7302C11.5327 19.5152 13 18.4934 13 16.877V15.2316L19.0966 19.6916C20.3991 20.5888 21.9998 19.4211 21.9998 17.5737Z" fill="#ffffff"/> </g>
+                </svg>
+              </div>
+              
             </button>
   
             <button id="state__button" class="icon__button interaction__button my-1 p-0" title="Pause">
-              <img id="pause__icon" class="w-[65%] hidden" src="icons/pause.svg">
-              <img id="play__icon" class="w-[45%]" src="icons/play.svg">
+
+              <div class="w-[65%] hidden" id="pause__icon">
+                <svg fill="#ffffff" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                  <title>pause</title>
+                  <path d="M5.92 24.096q0 0.832 0.576 1.408t1.44 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.44 0.576t-0.576 1.44v16.16zM18.016 24.096q0 0.832 0.608 1.408t1.408 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.408 0.576t-0.608 1.44v16.16z"></path>
+                  </svg>
+              </div>
+
+              <div class="w-[45%]" id="play__icon">
+                <svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 163.861 163.861" xml:space="preserve" stroke="#ffffff">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+                  <g id="SVGRepo_iconCarrier"> 
+                      <g> <path d="M34.857,3.613C20.084-4.861,8.107,2.081,8.107,19.106v125.637c0,17.042,11.977,23.975,26.75,15.509L144.67,97.275 c14.778-8.477,14.778-22.211,0-30.686L34.857,3.613z"/> </g> 
+                  </g>
+              </svg>
+              </div>
             </button>
   
             <button class="icon__button interaction__button my-1 p-0" title="Fullscreen">
-              <img class="w-[65%]" src="icons/fullscreen.svg">
+              <svg class="w-[65%]" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#ffffff" stroke-width="1.44"> <path d="M4 2C2.89543 2 2 2.89543 2 4V8C2 8.55228 2.44772 9 3 9C3.55228 9 4 8.55228 4 8V4H8C8.55228 4 9 3.55228 9 3C9 2.44772 8.55228 2 8 2H4Z" fill="#ffffff"/> <path d="M20 2C21.1046 2 22 2.89543 22 4V8C22 8.55228 21.5523 9 21 9C20.4477 9 20 8.55228 20 8V4H16C15.4477 4 15 3.55228 15 3C15 2.44772 15.4477 2 16 2H20Z" fill="#ffffff"/> <path d="M20 22C21.1046 22 22 21.1046 22 20V16C22 15.4477 21.5523 15 21 15C20.4477 15 20 15.4477 20 16V20H16C15.4477 20 15 20.4477 15 21C15 21.5523 15.4477 22 16 22H20Z" fill="#ffffff"/> <path d="M2 20C2 21.1046 2.89543 22 4 22H8C8.55228 22 9 21.5523 9 21C9 20.4477 8.55228 20 8 20H4V16C4 15.4477 3.55228 15 3 15C2.44772 15 2 15.4477 2 16V20Z" fill="#ffffff"/> </g>
+                <g id="SVGRepo_iconCarrier"> <path d="M4 2C2.89543 2 2 2.89543 2 4V8C2 8.55228 2.44772 9 3 9C3.55228 9 4 8.55228 4 8V4H8C8.55228 4 9 3.55228 9 3C9 2.44772 8.55228 2 8 2H4Z" fill="#ffffff"/> <path d="M20 2C21.1046 2 22 2.89543 22 4V8C22 8.55228 21.5523 9 21 9C20.4477 9 20 8.55228 20 8V4H16C15.4477 4 15 3.55228 15 3C15 2.44772 15.4477 2 16 2H20Z" fill="#ffffff"/> <path d="M20 22C21.1046 22 22 21.1046 22 20V16C22 15.4477 21.5523 15 21 15C20.4477 15 20 15.4477 20 16V20H16C15.4477 20 15 20.4477 15 21C15 21.5523 15.4477 22 16 22H20Z" fill="#ffffff"/> <path d="M2 20C2 21.1046 2.89543 22 4 22H8C8.55228 22 9 21.5523 9 21C9 20.4477 8.55228 20 8 20H4V16C4 15.4477 3.55228 15 3 15C2.44772 15 2 15.4477 2 16V20Z" fill="#ffffff"/> </g>
+                </svg>
             </button>
           </div>
         </div>
       </footer>
     </div>
-    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

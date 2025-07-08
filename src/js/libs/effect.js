@@ -2787,7 +2787,6 @@ export class Effect {
         let kayboardTexture = this.mRenderer.CreateTexture(this.mRenderer.TEXTYPE.T2D, 256, 3, this.mRenderer.TEXFMT.C1I8, this.mRenderer.FILTER.NONE, this.mRenderer.TEXWRP.CLAMP, null);
         let keyboardImage = new Image();
         if (callback !== null)
-            keyboardImage.src = "icons/repo.svg"; // don't load PNG if no UI 
         this.mKeyboard = { mData: keyboardData, mTexture: kayboardTexture, mIcon: keyboardImage };
 
         let iResize = function (xres, yres) {

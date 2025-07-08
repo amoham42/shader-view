@@ -294,7 +294,7 @@ function processShaderData(jsnShader) {
     iCompileAndStart(viewerParent, jsnShader);
 }
 
-function fetchShaderFromServer() {
+function fetchShaderFromServer(shaderID) {
     let httpReq = new XMLHttpRequest();
     httpReq.open("POST", window.API_CONFIG, true);
     httpReq.responseType = "json";
@@ -347,7 +347,7 @@ export function loadShader(shaderID) {
     chrome.storage.local.get([storageKey], function(result) {
         if (chrome.runtime.lastError) {
             if (DEBUG) console.warn("Storage access error:", chrome.runtime.lastError);
-            fetchShaderFromServer();
+            fetchShaderFromServer(shaderID);
             return;
         }
 
@@ -357,7 +357,7 @@ export function loadShader(shaderID) {
             processShaderData(cachedData.data);
         } else {
             if (DEBUG) console.log("Shader not in cache, fetching from server:", shaderID);
-            fetchShaderFromServer();
+            fetchShaderFromServer(shaderID);
         }
     });
 }
