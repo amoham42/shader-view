@@ -1,0 +1,31 @@
+# Node.js proxy files (no longer needed)
+src/js/proxy/
+
+# Development files
+*.log
+*.tmp
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.exe
+
+# Dependencies
+node_modules/
+
+# Documentation (if any)
+README.md
+docs/ 

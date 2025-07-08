@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://www.shadertoy.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://www.shadertoy.com/shadertoy",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  }
+]

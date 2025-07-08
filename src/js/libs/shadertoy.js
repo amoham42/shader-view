@@ -1,5 +1,7 @@
 "use strict"
 
+const DEBUG = false;
+
 import { 
     piGetCoords,
     piIsFullScreen,
@@ -10,7 +12,7 @@ import {
 import { Effect } from "./effect.js";
 window.gShaderToy = null;
 
-export class ShaderToy {
+class ShaderToy {
     constructor(parentElement) {
         if (parentElement === null) return;
 
@@ -23,7 +25,7 @@ export class ShaderToy {
         this.mCanvas = null;
         this.mFpsFrame = 0;
         this.mFpsTo = null;
-        this.mIsPaused = false;
+        this.mIsPaused = window.mIsPaused || false;
         this.mForceFrame = true;
         this.mInfo = null;
         this.mCode = null;
@@ -31,6 +33,8 @@ export class ShaderToy {
         this.mDisposed = false;
 
         this.mCanvas = document.getElementById("demogl");
+        this.previewImg = document.getElementById("preview");
+
         this.mCanvas.tabIndex = "0";
 
         var ww = parentElement.offsetWidth;
@@ -98,7 +102,7 @@ export class ShaderToy {
         };
 
         var resizeCB = function (xres, yres) { me.mForceFrame = true; };
-        var crashCB = function () { };
+        var crashCB = function () { console.error("ShaderToy: Effect crashed!"); };
         this.mEffect = new Effect(null, this.mAudioContext, this.mCanvas, this.RefreshTexturThumbail, this, true, false, resizeCB, crashCB);
         this.mCreated = true;
     }
@@ -110,14 +114,12 @@ export class ShaderToy {
             }
             
             me.mAnimationFrameId = requestAnimFrame(renderLoop2);
-            
-             if (me.mIsPaused && !me.mForceFrame) {
+            if (me.mIsPaused && !me.mForceFrame) {
                 if (me.mEffect && !me.mDisposed) {
                     me.mEffect.UpdateInputs(0, false);
                 }
                 return;
             }
-
             me.mForceFrame = false;
             var time = getRealTime();
             var ltime = me.mTOffset + time - me.mTo;
@@ -126,11 +128,20 @@ export class ShaderToy {
             
             if (me.mEffect && !me.mDisposed) {
                 me.mEffect.Paint(ltime / 1000.0, dtime / 1000.0, 60, me.mMouseOriX, me.mMouseOriY, me.mMousePosX, me.mMousePosY, me.mIsPaused);
+                if (me.mFpsFrame === 0) me.RemovePreview();
                 me.mFpsFrame++;
             }
         }
 
         renderLoop2();
+    }
+
+    RemovePreview() {
+        this.previewImg.classList.remove("opacity-100");
+        this.previewImg.classList.add("opacity-0");
+        setTimeout(() => {
+            this.previewImg.classList.add("hidden");
+        }, 500);
     }
     
     Stop() {
@@ -210,6 +221,10 @@ export class ShaderToy {
         this.mEffect.Compile(true, onResolve);
     }
 
+    OneFrame() {
+        if (this.mIsPaused) this.mForceFrame = true;
+    }
+
     dispose() {
         if (!this.mCreated || this.mDisposed) return;
         
@@ -231,7 +246,7 @@ export class ShaderToy {
     }
 }
 
-export function iCompileAndStart( viewerParent, jsnShader ) {
+function iCompileAndStart( viewerParent, jsnShader ) {
 
     if (window.gShaderToy && window.gShaderToy.mCreated) {
         window.gShaderToy.dispose();
@@ -256,10 +271,7 @@ export function iCompileAndStart( viewerParent, jsnShader ) {
         window.gShaderToy.Compile( function (worked) {
             if (!worked) return;
             if (window.gShaderToy.mIsPaused) window.gShaderToy.Stop();
-            
-            if (window.shaderViewUI) {
-                window.shaderViewUI.applyQuality();
-            }
+            if (window.shaderViewUI) window.shaderViewUI.applyQuality();
             
             window.gShaderToy.startRendering();
         });
@@ -274,22 +286,17 @@ export function toggleFullscreen() {
     } else {
         piExitFullScreen();
     }
-    if (window.gShaderToy.mIsPaused) window.gShaderToy.mForceFrame = true;
 }
 
-export function loadShader(shaderID) {
-    window.gShaderID = shaderID;
-
-    if (window.gShaderToy && window.gShaderToy.mCreated) {
-        window.gShaderToy.dispose();
-    }
-    
+function processShaderData(jsnShader) {
     let viewerParent = document.getElementById("player");
-    const existingImages = viewerParent.querySelectorAll('img:not(#noWebGL_ShaderImage)');
-    existingImages.forEach(img => img.remove());
+    window.shaderViewUI.updateShaderInfo(jsnShader[0].info);
+    iCompileAndStart(viewerParent, jsnShader);
+}
 
+function fetchShaderFromServer() {
     let httpReq = new XMLHttpRequest();
-    httpReq.open("POST", "http://localhost:3000/shadertoy", true);
+    httpReq.open("POST", window.API_CONFIG, true);
     httpReq.responseType = "json";
     httpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     let str = "{ \"shaders\" : [\"" + shaderID + "\"] }";
@@ -302,22 +309,24 @@ export function loadShader(shaderID) {
             return;
         }
 
-        if (window.shaderViewUI) window.shaderViewUI.updateShaderInfo(jsnShader[0].info);
-        
-        if (jsnShader[0].info.usePreview === 1) {
-            let url = "/media/shaders/" + shaderID + ".jpg";
-            let img = new Image();
-            img.style = "width:100%;";
-            img.onload = function () {
-                viewerParent.appendChild(img);
-            };
-            img.onerror = function (ev) { 
-                iCompileAndStart(viewerParent, jsnShader); 
-            };
-            img.src = url;
-        } else {
-            iCompileAndStart(viewerParent, jsnShader);
-        }
+        const storageKey = `shader_${shaderID}`;
+        const dataToStore = {
+            data: jsnShader,
+            timestamp: Date.now(),
+            version: 1
+        };
+
+        chrome.storage.local.set({
+            [storageKey]: dataToStore
+        }, function() {
+            if (chrome.runtime.lastError) {
+                if (DEBUG) console.warn("Failed to cache shader data:", chrome.runtime.lastError);
+            } else {
+                if (DEBUG) console.log("Shader data cached successfully for:", shaderID);
+            }
+        });
+
+        processShaderData(jsnShader);
     }
     
     httpReq.onerror = function() {
@@ -325,4 +334,30 @@ export function loadShader(shaderID) {
     };
     
     httpReq.send(str);
+}
+
+export function loadShader(shaderID) {
+    window.gShaderID = shaderID;
+
+    if (window.gShaderToy && window.gShaderToy.mCreated) {
+        window.gShaderToy.dispose();
+    }
+    
+    const storageKey = `shader_${shaderID}`;
+    chrome.storage.local.get([storageKey], function(result) {
+        if (chrome.runtime.lastError) {
+            if (DEBUG) console.warn("Storage access error:", chrome.runtime.lastError);
+            fetchShaderFromServer();
+            return;
+        }
+
+        const cachedData = result[storageKey];
+        if (cachedData && cachedData.data) {
+            if (DEBUG) console.log("Loading shader from cache:", shaderID);
+            processShaderData(cachedData.data);
+        } else {
+            if (DEBUG) console.log("Shader not in cache, fetching from server:", shaderID);
+            fetchShaderFromServer();
+        }
+    });
 }

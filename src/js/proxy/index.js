@@ -9,7 +9,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 app.post("/shadertoy", (req, res) => {
-  // 1) build the x-www-form-urlencoded payload
   const body = new URLSearchParams({
     s:  req.body.s  || "",
     nt: req.body.nt || "0",
@@ -17,10 +16,7 @@ app.post("/shadertoy", (req, res) => {
     np: req.body.np || "0",
   }).toString();
 
-  // 2) open an HTTP/2 session
   const client = http2.connect("https://www.shadertoy.com");
-
-  // 3) create a request with pseudo-headers + real headers
   const proxyReq = client.request({
     // HTTP/2 pseudo-headers
     ":method":        "POST",
@@ -41,15 +37,11 @@ app.post("/shadertoy", (req, res) => {
     "referer":        "https://www.shadertoy.com/embed/ttcSD8?gui=true&t=10&paused=false&muted=true",
   });
 
-  // 4) send body and end the request
   proxyReq.end(body);
 
-  // 5) when headers come back, copy status + real headers to Express
   proxyReq.on("response", (headers) => {
-    // HTTP/2 status is in the pseudo-header ":status"
     const status = headers[":status"] || 200;
     res.status(status);
-    // copy back every non-pseudo header
     Object.keys(headers).forEach((name) => {
       if (!name.startsWith(":")) {
         res.setHeader(name, headers[name]);

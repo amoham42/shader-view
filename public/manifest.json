@@ -4,18 +4,22 @@
     "version": "1.0",
     "description": "Display random Shadertoy shaders on new tabs",
     "icons": {
-        "16": "icons/shader_view_icon.ico",
-        "48": "icons/shader_view_icon.ico",
-        "128": "icons/shader_view_icon.ico"
+        "16": "shader_view_icon.ico",
+        "48": "shader_view_icon.ico",
+        "128": "shader_view_icon.ico"
     },
     "permissions": [
-        "activeTab",
+        "tabs",
         "storage"
     ],
     "host_permissions": [
-        "https://www.shadertoy.com/*"
+        "*://www.shadertoy.com/*"
     ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "chrome_url_overrides": {
         "newtab": "index.html"
     }
+   
 }

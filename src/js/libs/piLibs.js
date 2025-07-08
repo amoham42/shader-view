@@ -488,27 +488,27 @@ export function piRenderer()
                         }
                         
                         
-                        var maxTexSize = mGL.getParameter( mGL.MAX_TEXTURE_SIZE );
-                        var maxCubeSize = mGL.getParameter( mGL.MAX_CUBE_MAP_TEXTURE_SIZE );
-                        var maxRenderbufferSize = mGL.getParameter( mGL.MAX_RENDERBUFFER_SIZE );
-                        var extensions = mGL.getSupportedExtensions();
-                        var textureUnits = mGL.getParameter( mGL.MAX_TEXTURE_IMAGE_UNITS );
-                        console.log("WebGL (2.0=" + mIs20 + "):" +
-                                    " Asynch Compile: "  + ((mAsynchCompile !==null) ? "yes" : "no") +
-                                    ", Textures: F32 ["   + ((mFloat32Textures !==null) ? "yes" : "no") +
-                                    "], F32 Linear Filter ["   + ((mFloat32Filter !==null) ? "yes" : "no") +
-                                    "], F16 ["   + ((mFloat16Textures !==null) ? "yes" : "no") +
-                                    "], F16 Linear Filter ["   + ((mFloat16Filter !==null) ? "yes" : "no") +
-                                    "], Depth [" + ((mDepthTextures   !==null) ? "yes" : "no") +
-                                    "], LOD ["    + ((mShaderTextureLOD!==null) ? "yes" : "no") +
-                                    "], Aniso ["   + ((mAnisotropic     !==null) ? "yes" : "no") +
-                                    "], Units [" + textureUnits +
-                                    "], Max Size [" + maxTexSize +
-                                    "], Cube Max Size [" + maxCubeSize +
-                                    "], Targets: MRT ["            + ((mDrawBuffers     !==null) ? "yes" : "no") +
-                                    "], F32 ["     + ((mRenderToFloat32F!==null) ? "yes" : "no") +
-                                    "], Max Size [" + maxRenderbufferSize + "]"
-                                );
+                        // var maxTexSize = mGL.getParameter( mGL.MAX_TEXTURE_SIZE );
+                        // var maxCubeSize = mGL.getParameter( mGL.MAX_CUBE_MAP_TEXTURE_SIZE );
+                        // var maxRenderbufferSize = mGL.getParameter( mGL.MAX_RENDERBUFFER_SIZE );
+                        // var extensions = mGL.getSupportedExtensions();
+                        // var textureUnits = mGL.getParameter( mGL.MAX_TEXTURE_IMAGE_UNITS );
+                        // console.log("WebGL (2.0=" + mIs20 + "):" +
+                        //             " Asynch Compile: "  + ((mAsynchCompile !==null) ? "yes" : "no") +
+                        //             ", Textures: F32 ["   + ((mFloat32Textures !==null) ? "yes" : "no") +
+                        //             "], F32 Linear Filter ["   + ((mFloat32Filter !==null) ? "yes" : "no") +
+                        //             "], F16 ["   + ((mFloat16Textures !==null) ? "yes" : "no") +
+                        //             "], F16 Linear Filter ["   + ((mFloat16Filter !==null) ? "yes" : "no") +
+                        //             "], Depth [" + ((mDepthTextures   !==null) ? "yes" : "no") +
+                        //             "], LOD ["    + ((mShaderTextureLOD!==null) ? "yes" : "no") +
+                        //             "], Aniso ["   + ((mAnisotropic     !==null) ? "yes" : "no") +
+                        //             "], Units [" + textureUnits +
+                        //             "], Max Size [" + maxTexSize +
+                        //             "], Cube Max Size [" + maxCubeSize +
+                        //             "], Targets: MRT ["            + ((mDrawBuffers     !==null) ? "yes" : "no") +
+                        //             "], F32 ["     + ((mRenderToFloat32F!==null) ? "yes" : "no") +
+                        //             "], Max Size [" + maxRenderbufferSize + "]"
+                        //         );
 
                         // create a 2D quad Vertex Buffer
                         var vertices = new Float32Array( [ -1.0, -1.0,   1.0, -1.0,    -1.0,  1.0,     1.0, -1.0,    1.0,  1.0,    -1.0,  1.0] );

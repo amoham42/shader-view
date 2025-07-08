@@ -1,3 +1,5 @@
+const DEBUG = false;
+
 import { loadShader, toggleFullscreen } from './libs/shadertoy.js';
 
 export class ShaderViewUI {
@@ -17,14 +19,16 @@ export class ShaderViewUI {
     this.closeBtn = document.querySelector('.history__close');
 
     this.canvas = document.getElementById('demogl');
+    this.previewImg = document.getElementById("preview");
+
     this.qualitySelect = document.getElementById('quality-select');
 
     this.snapshotBtn = document.querySelector('button[title="Snapshot"]');
 
     this.rewindBtn     = document.querySelector('button[title="Rewind"]');
-    this.pauseBtn      = document.querySelector('button[title="Pause"]');
     this.fullscreenBtn = document.querySelector('button[title="Fullscreen"]');
   
+    this.stateBtn = document.getElementById('state__button');
     this.pauseIcon = document.getElementById('pause__icon');
     this.playIcon = document.getElementById('play__icon');
     
@@ -34,6 +38,12 @@ export class ShaderViewUI {
     this.boundOnQualityChange = this.onQualityChange.bind(this);
     this.boundApplyQuality = this.applyQuality.bind(this);
     this.boundResizeHandler = this.applyQuality.bind(this);
+
+    // Set default render mode state - will be properly loaded in init()
+    this.pauseIcon.classList.add('hidden');
+    this.playIcon.classList.remove('hidden');
+    this.stateBtn.title = 'Play';
+    window.mIsPaused = true;
   }
 
   async init() {
@@ -59,6 +69,12 @@ export class ShaderViewUI {
 
     this.initSnapshot();
     await this.initQuality();
+    await this.initRenderMode();
+
+    document.getElementById('new-tab-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      chrome.tabs.create({ url: 'chrome://new-tab-page' });
+    });
 
     loadShader(window.gShaderID);
     this.interactionButtonsInit();
@@ -88,44 +104,22 @@ export class ShaderViewUI {
     });
   }
 
-  dispose() {
-    if (this.eventListenersAdded) {
-      document.removeEventListener('mousemove', this.boundShowUI);
-      document.removeEventListener('touchstart', this.boundShowUI);
-      this.eventListenersAdded = false;
-    }
-    
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-      this.timeout = null;
-    }
-
-    // Quality management cleanup
-    if (this.qualitySelect) {
-      this.qualitySelect.removeEventListener('change', this.boundOnQualityChange);
-    }
-    
-    if (this.boundResizeHandler) {
-      window.removeEventListener('resize', this.boundResizeHandler);
-    }
-  }
-
   updateShaderInfo(info) {
-    if (this.nameEl) this.nameEl.textContent = info.name;
-    if (this.authorEl) this.authorEl.textContent = `by ${info.username}`;
-    if (this.linkEl) this.linkEl.href = `https://www.shadertoy.com/view/${window.gShaderID}`;
-    if (this.likeEl) this.likeEl.textContent = info.likes;
-    if (this.viewEl) this.viewEl.textContent = info.viewed;
+    if(!info) return;
+    this.nameEl.textContent = info.name;
+    this.authorEl.textContent = `by ${info.username}`;
+    this.linkEl.href = `https://www.shadertoy.com/view/${window.gShaderID}`;
+    this.likeEl.textContent = info.likes;
+    this.viewEl.textContent = info.viewed;
   }
 
   populateHistoryItems(data) {
     this.historyContent.innerHTML = '';
-
-    for (let i = 0; i < 10; i++) {
+    const entries = Object.entries(data);
+    for (let i = 0; i < entries.length; i++) {
       const historyItem = document.createElement('div');
       historyItem.className = 'history__item transition-opacity';
-
-      const item = data[i];
+      const item = entries[i][1];
       if (item) {
         historyItem.classList.add(
           'cursor-pointer',
@@ -136,13 +130,17 @@ export class ShaderViewUI {
         img.src = item.imageUrl;
         img.alt = `Item ${i + 1}`;
         img.className = 'item__image';
-
         const textOverlay = document.createElement('div');
-        textOverlay.className = 'item__text-overlay';
+        textOverlay.className = 'item__text-overlay josefin-medium';
         textOverlay.textContent = item.text;
 
         historyItem.addEventListener('click', () => {
-          console.log(`Loading shader: ${item.id}`);
+          if (DEBUG) console.log(`Loading shader: ${item.id}`);
+          this.previewImg.src = item.imageUrl;
+          this.previewImg.classList.remove("hidden");
+          this.previewImg.classList.remove("opacity-0");
+          this.previewImg.classList.add("opacity-100");
+
           loadShader(item.id);
 
           if (this.closeBtn) this.closeBtn.click();
@@ -189,35 +187,30 @@ export class ShaderViewUI {
       this.qualitySelect.value = this.currentQuality;
       this.qualitySelect.addEventListener('change', this.boundOnQualityChange);
     }
-    
     window.addEventListener('resize', this.boundResizeHandler);
   }
 
   onQualityChange(e) {
     const v = e.target.value;
-    this.currentQuality = v; // Keep capitalized to match HTML options
+    this.currentQuality = v;
     this.saveQualitySetting();
     this.applyQuality();
   }
 
   async saveQualitySetting() {
     try {
-      // await chrome.storage.local.set({ canvasQuality: this.currentQuality });
+      window.shaderHistoryManager.saveQuality(this.currentQuality);
     } catch (err) {
-      console.warn('Could not save quality:', err);
+      if (DEBUG) console.warn('Could not save quality:', err);
     }
   }
 
   async loadQualitySetting() {
     try {
-      // const res = await chrome.storage.local.get(['canvasQuality']);
-      // if (res.canvasQuality) {
-      //   this.currentQuality = res.canvasQuality;
-      // } else {
-      //   await this.saveQualitySetting();
-      // }
+      this.currentQuality = await window.shaderHistoryManager.loadQuality() || 'High';
+      this.applyQuality();
     } catch (err) {
-      console.warn('Could not load quality:', err);
+      if (DEBUG) console.warn('Could not load quality:', err);
       await this.saveQualitySetting();
     }
   }
@@ -241,12 +234,38 @@ export class ShaderViewUI {
       this.canvas.style.width = `100%`;
       this.canvas.style.height = `100%`;
     }
+    window.gShaderToy.OneFrame();
+  }
+
+  // Render mode management methods
+  async initRenderMode() {
+    try {
+      const renderMode = await window.shaderHistoryManager.loadRenderMode();
+      this.applyRenderMode(renderMode);
+    } catch (err) {
+      if (DEBUG) console.warn('Could not load render mode:', err);
+      this.applyRenderMode('Pause'); // Default to pause mode
+    }
+  }
+
+  applyRenderMode(renderMode) {
+    if (renderMode === 'Play') {
+      this.pauseIcon.classList.remove('hidden');
+      this.playIcon.classList.add('hidden');
+      this.stateBtn.title = 'Pause';
+      window.mIsPaused = false;
+    } else {
+      this.pauseIcon.classList.add('hidden');
+      this.playIcon.classList.remove('hidden');
+      this.stateBtn.title = 'Play';
+      window.mIsPaused = true;
+    }
   }
 
   interactionButtonsInit() {
    
-    if (!this.rewindBtn || !this.pauseBtn || !this.fullscreenBtn) {
-        console.warn('One or more interaction buttons not found');
+    if (!this.rewindBtn || !this.stateBtn || !this.fullscreenBtn) {
+        if (DEBUG) console.warn('One or more interaction buttons not found');
         return;
     }
 
@@ -256,17 +275,21 @@ export class ShaderViewUI {
         }
     });
   
-    this.pauseBtn.addEventListener('click', () => {
-        if (!window.gShaderToy) return;
-        window.gShaderToy.pauseTime();
-        if (window.gShaderToy.mIsPaused) {
+    this.stateBtn.addEventListener('click', () => {
+      if (!window.gShaderToy) return;
+      window.gShaderToy.pauseTime();
+      window.mIsPaused = window.gShaderToy.mIsPaused;
+        
+        if (window.mIsPaused) {
             this.pauseIcon.classList.add('hidden');
             this.playIcon.classList.remove('hidden');
-            this.pauseBtn.title = 'Play';
+            this.stateBtn.title = 'Play';
+            window.shaderHistoryManager.saveRenderMode('Pause');
         } else {
             this.pauseIcon.classList.remove('hidden');
             this.playIcon.classList.add('hidden');
-            this.pauseBtn.title = 'Pause';
+            this.stateBtn.title = 'Pause';
+            window.shaderHistoryManager.saveRenderMode('Play');
         }
     });
   
@@ -274,5 +297,9 @@ export class ShaderViewUI {
         if (!window.gShaderToy) return;
         toggleFullscreen();
     });
-}
+
+    document.addEventListener('fullscreenchange', () => {
+        window.gShaderToy.OneFrame();
+    });
+  }
 }

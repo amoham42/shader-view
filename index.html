@@ -2,14 +2,6 @@
 <html lang="en">
   <head>
     <link href="./shader_view_icon.ico" rel="icon" type="image/x-icon"/>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lobster:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
     <title>Shader View</title>
     <meta charset="utf-8" />
     <meta name="Keywords" content="shadertoy, shader toy, quilez, inigo, jeremias, pol, fractals, demoscene, computer graphics, mathematics, rendering, demo, 3D, realtime, shader, raytracing, raymarching, webgl, glsl" />
@@ -18,27 +10,24 @@
     <meta name="revisit-after" content="3 days"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   </head>
-  <body class="[-ms-overflow-style:none] bg-black
-           font-[Segoe_UI,_Tahoma,_Geneva,_Verdana,_sans-serif]
-           absolute left-0 top-0 w-full h-full m-0 p-0 overflow-hidden">
+  <body class="bg-black absolute left-0 top-0 w-full h-full m-0 p-0 overflow-hidden">
      
     <div class="history__content hidden"></div>
     <div class="master__container">
       <div id="player" class="absolute z-0 w-full h-full">
-        <canvas id="demogl"></canvas>
-        <div id="noWebGL" class="absolute top-0 left-0 w-screen h-screen border-0 rounded-t-md cursor-pointer bg-black invisible">
-          <img id="noWebGL_ShaderImage"/>
-          <span id="noWebGL_Text" class="absolute left-px-8 text-[1.5rem] border-0 text-white">
-            No WebGL available :(
-          </span>
-        </div>
+        <canvas id="demogl" class="absolute inset-0 w-full h-full"></canvas>
+        <img 
+          id="preview" 
+          class="absolute inset-0 w-full h-full object-cover opacity-100 z-10 transition-opacity duration-500 ease-in-out" 
+          alt="Shader Preview"
+        >
       </div>
   
-      <header class="show-on-hover absolute inset-x-0 top-0 px-4 py-1 flex items-center justify-between z-10">
+      <header class="show-on-hover absolute inset-x-0 top-0 px-4 py-1 flex items-center justify-between z-10 backdrop-blur-lg">
         <a 
           href="https://www.shadertoy.com" 
           target="_blank"
-          class = "text-white text-[2rem] font-bold font-[Lobster,_sans-serif] hover:text-[#ff8020]">
+          class = "text-white text-[2rem] lobster-medium hover:text-[#ff8020]">
           Shadertoy
         </a>
         <div class="flex items-center space-x-3">
@@ -65,13 +54,13 @@
         </div>
       </header>
   
-      <div class="menu__content hidden">
+      <div class="menu__content backdrop-blur-lg hidden">
         <div class="menu__packed">
-          <a class="menu__item gap-4" href="javascript:void(window.open('chrome://new-tab-page',''))" target="_blank">
+          <a class="menu__item gap-4" id="new-tab-link" href="#" target="_blank">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon icon--tab" width="1.5rem" height="1.5rem"> 
               <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h10v4h8v10z" fill="white"></path> 
             </svg>
-            <span class="text-white font-medium font-[Josefin+Sans]">Open Default Tab</span>
+            <span class="text-white josefin-medium">Open Default Tab</span>
           </a>
           <button class="icon__button menu__close p-0 w-10 flex items-center justify-center hidden" type="button" title="Close Menu">
             <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" height="1.5rem">
@@ -83,20 +72,20 @@
         <div class="menu__packed">
           <button class="menu__item gap-4 cursor-pointer" title="Snapshot">
             <img class="p-0 m-0" src="icons/screenshot.svg" alt="Snapshot" style="width:1.5rem; height:1.5rem;">
-            <span class="text-white font-medium font-[Josefin+Sans]">Snapshot</span>
+            <span class="text-white josefin-medium">Snapshot</span>
           </button>
         </div>
   
         <div id="quality__value" class="menu__packed cursor-pointer">
           <button id="quality__button" class="menu__item gap-4" title="Quality">
             <img class="p-0 m-0" src="icons/quality.svg" alt="Quality" style="width:1.5rem; height:1.5rem;">
-            <span class="text-white font-medium font-[Josefin+Sans]">Quality</span>
+            <span class="text-white josefin-medium">Quality</span>
           </button>
-          <select id="quality-select" class="text-center text-white font-medium font-[Josefin+Sans] p-1">
-            <option value="Ultra" class="text-black font-medium font-[Josefin+Sans]">Ultra</option>
-            <option value="High" class="text-black font-medium font-[Josefin+Sans]">High</option> 
-            <option value="Medium" class="text-black font-medium font-[Josefin+Sans]">Medium</option>
-            <option value="Low" class="text-black font-medium font-[Josefin+Sans]">Low</option>
+          <select id="quality-select" class="text-center text-white josefin-medium p-1">
+            <option value="Ultra" class="text-black josefin-medium">Ultra</option>
+            <option value="High" class="text-black josefin-medium">High</option> 
+            <option value="Medium" class="text-black josefin-medium">Medium</option>
+            <option value="Low" class="text-black josefin-medium">Low</option>
           </select>
         </div>
          
@@ -106,30 +95,30 @@
               <path fill="none" d="M0 0h24v24H0V0z"/>
               <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
             </svg>
-            <span class="text-white font-medium font-[Josefin+Sans]">Shader View Repository</span>
+            <span class="text-white josefin-medium">Shader View Repository</span>
           </a>
         </div>
       </div>
   
-      <footer class="show-on-hover absolute inset-x-0 bottom-0 px-4 items-center justify-between z-10">
+      <footer class="show-on-hover absolute inset-x-0 bottom-0 px-4 items-center justify-between z-10 backdrop-blur-lg">
         <div class="flex items-center gap-4">
   
           <a href="#" target="_blank" class="shader__link flex items-center text-white">
             <div class="content-center flex flex-col">
-              <span class="shader__name text-xl font-bold font-[Josefin+Sans]"></span>
-              <span class="shader__author text-normal font-[Josefin+Sans]"></span>
+              <span class="shader__name text-xl josefin-bold"></span>
+              <span class="shader__author text-normal josefin-light"></span>
             </div>
           </a>
           <div class="w-px h-10 bg-gray-400 p-0 m-0"></div>
           <div class="flex items-center text-white gap-4">
             <div class="flex flex-col items-center p-0 m-0">
               <img class="mt-1" src="icons/like.svg" alt="Likes" style="width: 1.5rem; height: 1.5rem;"/>
-              <span class="like__impressions text-normal font-[Josefin+Sans] mt-1"></span>
+              <span class="like__impressions text-normal josefin-light mt-1"></span>
             </div>
           
             <div class="flex flex-col items-center p-0 m-0">
               <img class="mt-1.5" src="icons/view.svg" alt="Views" style="width: 1.5rem; height: 1.5rem;"/>
-              <span class="view__impressions text-normal font-[Josefin+Sans] mt-0.5"></span>
+              <span class="view__impressions text-normal josefin-light mt-0.5"></span>
             </div>
           </div>
   
@@ -138,9 +127,9 @@
               <img class="w-[65%]" src="icons/rewind.svg">
             </button>
   
-            <button class="icon__button interaction__button my-1 p-0" title="Pause">
-              <img id="pause__icon" class="w-[65%]" src="icons/pause.svg">
-              <img id="play__icon" class="w-[45%] hidden" src="icons/play.svg">
+            <button id="state__button" class="icon__button interaction__button my-1 p-0" title="Pause">
+              <img id="pause__icon" class="w-[65%] hidden" src="icons/pause.svg">
+              <img id="play__icon" class="w-[45%]" src="icons/play.svg">
             </button>
   
             <button class="icon__button interaction__button my-1 p-0" title="Fullscreen">

@@ -1155,7 +1155,6 @@ export class EffectPass {
         if (renderer === null) return;
 
         let texture = null;
-
         if (url === null || url.mType === null) {
             if (me.mTextureCallbackFun !== null)
                 me.mTextureCallbackFun(this.mTextureCallbackObj, slot, null, true, 0, 0, -1.0, me.mID);
@@ -2788,7 +2787,7 @@ export class Effect {
         let kayboardTexture = this.mRenderer.CreateTexture(this.mRenderer.TEXTYPE.T2D, 256, 3, this.mRenderer.TEXFMT.C1I8, this.mRenderer.FILTER.NONE, this.mRenderer.TEXWRP.CLAMP, null);
         let keyboardImage = new Image();
         if (callback !== null)
-            keyboardImage.src = "/img/keyboard.png"; // don't load PNG if no UI 
+            keyboardImage.src = "icons/repo.svg"; // don't load PNG if no UI 
         this.mKeyboard = { mData: keyboardData, mTexture: kayboardTexture, mIcon: keyboardImage };
 
         let iResize = function (xres, yres) {
@@ -2800,59 +2799,88 @@ export class Effect {
             resizeCallback(xres, yres);
         };
 
-        let bestAttemptFallback = function () {
-            me.SetQualityScale(me.mQualityScale);
+        const bestAttemptFallback = () => {
+    me.SetQualityScale(me.mQualityScale);
+  };
 
-        };
+  if (!window.ResizeObserver) {
+    console.warn(
+      "WARNING: This browser doesn't support ResizeObserver; " +
+      "falling back to window.resize."
+    );
+    bestAttemptFallback();
+    window.addEventListener("resize", bestAttemptFallback);
+    me.mCreated = true;
+    return;
+  }
 
-        if (!window.ResizeObserver) {
-            console.log("WARNING: This browser doesn't support ResizeObserver.");
-            bestAttemptFallback();
-            window.addEventListener("resize", bestAttemptFallback);
-        }
+  me.mRO = new ResizeObserver((entries, observer) => {
+    // Defer to the next frame to avoid nested ResizeObserver loops
+    window.requestAnimationFrame(() => {
+      if (!me.mCanvas || !me.mRenderer || !me.mCreated) return;
 
-        else {
-            this.mRO = new ResizeObserver(function (entries, observer) {
-                // Safety check: ensure effect is not disposed
-                if (!me.mCanvas || !me.mRenderer || !me.mCreated) {
-                    return;
-                }
-                
-                var entry = entries[0];
-                if (!entry['devicePixelContentBoxSize']) {
-                    observer.unobserve(me.mCanvas);
-                    console.log("WARNING: This browser doesn't support ResizeObserver + device-pixel-content-box (2)");
-                    bestAttemptFallback();
-                    window.addEventListener("resize", bestAttemptFallback);
-                }
+      const entry = entries[0];
+      // Try the device‐pixel‐content‐box API, otherwise fallback
+      const boxList =
+        entry.devicePixelContentBoxSize ||
+        entry.contentBoxSize;
 
-                else {
-                    let box = entry.devicePixelContentBoxSize[0];
-                    const xres = box.inlineSize;
-                    const yres = box.blockSize;
-                    
-                    const scaledXres = Math.max(Math.round(xres * me.mQualityScale), 400);
-                    const scaledYres = Math.max(Math.round(yres * me.mQualityScale), 300);
+      if (!boxList) {
+        observer.unobserve(me.mCanvas);
+        console.warn(
+          "WARNING: devicePixelContentBoxSize unsupported; " +
+          "switching to window.resize fallback."
+        );
+        bestAttemptFallback();
+        window.addEventListener("resize", bestAttemptFallback);
+        return;
+      }
 
-                    me.mCanvas.width = scaledXres;
-                    me.mCanvas.height = scaledYres;
-                    me.mXres = scaledXres;
-                    me.mYres = scaledYres;
-                    me.ResizeBuffers(scaledXres, scaledYres);
-                }
-            });
-            try {
-                this.mRO.observe(this.mCanvas, { box: ["device-pixel-content-box"] });
-                //this.mRO.observe(this.mCanvas);
-            }
-            catch (e) {
-                console.log("WARNING: This browser doesn't support ResizeObserver + device-pixel-content-box (1)");
-                bestAttemptFallback();
-                window.addEventListener("resize", bestAttemptFallback);
-            }
-        }
+      const box = Array.isArray(boxList) ? boxList[0] : boxList;
+      const xres = box.inlineSize;
+      const yres = box.blockSize;
 
-        this.mCreated = true;
+      // Compute new dimensions:
+      //   x_scaled = max(round(xres * qualityScale), 400)
+      //   y_scaled = max(round(yres * qualityScale), 300)
+      const scaledXres = Math.max(
+        Math.round(xres * me.mQualityScale),
+        400
+      );
+      const scaledYres = Math.max(
+        Math.round(yres * me.mQualityScale),
+        300
+      );
+
+      // Only resize if it actually changed
+      if (
+        me.mCanvas.width !== scaledXres ||
+        me.mCanvas.height !== scaledYres
+      ) {
+        me.mCanvas.width  = scaledXres;
+        me.mCanvas.height = scaledYres;
+        me.mXres = scaledXres;
+        me.mYres = scaledYres;
+        me.ResizeBuffers(scaledXres, scaledYres);
+      }
+    });
+  });
+
+  try {
+    me.mRO.observe(me.mCanvas, {
+      box: ["device-pixel-content-box"]
+    });
+  } catch (e) {
+    console.warn(
+      "WARNING: device-pixel-content-box unsupported; " +
+      "falling back to window.resize.",
+      e
+    );
+    bestAttemptFallback();
+    window.addEventListener("resize", bestAttemptFallback);
+  }
+
+  me.mCreated = true;
     }
     ResizeCubemapBuffer(i, xres, yres) {
         let oldXres = this.mCubeBuffers[i].mResolution[0];
@@ -3368,8 +3396,8 @@ export class Effect {
                 let lid = rpass.inputs[i].channel;
                 let styp = rpass.inputs[i].type;
                 let sid = rpass.inputs[i].id;
-                let ssrc = rpass.inputs[i].filepath;
-                let psrc = rpass.inputs[i].previewfilepath;
+                let ssrc = "https://www.shadertoy.com" + rpass.inputs[i].filepath;
+                let psrc = "https://www.shadertoy.com" + rpass.inputs[i].previewfilepath;
                 let samp = rpass.inputs[i].sampler;
 
                 wpass.NewTexture(this.mAudioContext, lid, { mType: styp, mID: sid, mSrc: ssrc, mSampler: samp, mPreviewSrc: psrc }, this.mBuffers, this.mCubeBuffers, this.mKeyboard);
